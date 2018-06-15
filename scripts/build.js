@@ -24,7 +24,7 @@ compressor.minify({
 compressor.minify({
      compressor: 'no-compress',
      input: 'src/style.css',
-     output: 'dist/sytle.css',
+     output: 'dist/table-sortable.css',
      callback: function(err) {
           if (err)
                console.error(err.message)
@@ -32,7 +32,7 @@ compressor.minify({
           compressor.minify({
                compressor: 'clean-css',
                input: 'src/style.css',
-               output: 'dist/sytle.min.css',
+               output: 'dist/table-sortable.min.css',
                callback: function(err) {
                     if (err)
                          console.error(err.message)
