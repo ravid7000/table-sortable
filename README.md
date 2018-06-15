@@ -27,3 +27,6 @@ Table Sortable has only one dependency [jquery](https://jquery.com/)
 | nextText            | `html-element/selector`                      | `<span>Next</span>`                                 |
 | prevText            | `html-element/>selector`                      | `<span>Prev</span>`                                 |
 | events              | `onInit, onUpdate, onDistroy`                   |                                                     |
+
+
+See [src/test.js](https://github.com/ravid7000/table-sortable/blob/master/src/test.js) file for all configurations
