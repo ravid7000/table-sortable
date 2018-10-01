@@ -291,7 +291,7 @@ var TableSortable = function () {
             this.currentPage = page;
             this.leftBase = this.currentPage * this.rowsOnPage;
             this.rightBase = Math.min(this.leftBase + this.rowsOnPage, data.length);
-            return;
+            return this.currentPage;
         }
     }, {
         key: 'getColumns',
@@ -407,6 +407,7 @@ var TableSortable = function () {
                     btnGroup.append(btnDotsLeft);
                     map(btnArray.slice(l, r), function (elm) {
                         btnGroup.append(elm);
+                        return elm
                     });
                     btnGroup.append(btnDotsRight);
                     btnGroup.append(btnArray[btnArray.length - 1]);
@@ -415,6 +416,7 @@ var TableSortable = function () {
                     var _r = paginationLength;
                     map(btnArray.slice(_l, _r), function (elm) {
                         btnGroup.append(elm);
+                        return elm
                     });
                     btnGroup.append(btnDotsRight);
                     btnGroup.append(btnArray[btnArray.length - 1]);
@@ -425,55 +427,54 @@ var TableSortable = function () {
                     btnGroup.append(btnDotsLeft);
                     map(btnArray.slice(_l2, _r2), function (elm, i) {
                         btnGroup.append(elm);
-                        $(elm).click(function() {
-                            _this.getPagesOffset(i);
-                            _this.generatePagination();
-                            _this.constructTableCell();
-                            _this.afterUpadte();
-                        })
+                        return elm
                     });
                 }
             } else {
                 map(btnArray, function (elm, i) {
                     btnGroup.append(elm);
-                    $(elm).click(function() {
-                        _this.getPagesOffset(i);
-                        _this.generatePagination();
-                        _this.constructTableCell();
-                        _this.afterUpadte();
-                    })
+                    return elm
                 });
             }
 
             btnGroup.append(nextBtn);
 
+            btnGroup.click(function(e) {
+                if ($(e.target).is(nextBtn)) {
+                    _this.getPagesOffset(_this.currentPage + 1);
+                    _this.constructTableCell();
+                    _this.generatePagination();
+                    _this.afterUpadte();
+                } else if ($(e.target).is(prevBtn)) {
+                    _this.getPagesOffset(_this.currentPage - 1);
+                    _this.constructTableCell();
+                    _this.generatePagination();
+                    _this.afterUpadte();
+                } else {
+                    for (var i = 0; i < btnArray.length; i++) {
+                        var b = $(btnArray[i])
+                        if ($(e.target).is(b)) {
+                            _this.getPagesOffset(i);
+                            _this.constructTableCell();
+                            _this.generatePagination();
+                            _this.afterUpadte();
+                        }
+                    }
+                }
+            })
+
             if (this.currentPage === 0) {
                 prevBtn.attr('disabled', true);
-            } else {
-                prevBtn.click(function () {
-                    _this.getPagesOffset(_this.currentPage - 1);
-                    _this.generatePagination();
-                    _this.constructTableCell();
-                    _this.afterUpadte();
-                });
             }
 
             if (this.currentPage === btnArray.length - 1) {
                 nextBtn.attr('disabled', true);
-            } else {
-                nextBtn.click(function () {
-                    _this.getPagesOffset(_this.currentPage + 1);
-                    _this.generatePagination();
-                    _this.constructTableCell();
-                    _this.afterUpadte();
-                });
             }
-
             this.btnGroup = btnGroup;
 
             if (this.controlRow) {
                 if (showPaginationLabel) {
-                    var showLabel = '<span>Showing ' + (this.leftBase + 1) + ' to ' + this.rightBase + ' of ' + data.length + ' entries</span>';
+                    var showLabel = '<span class="page-label">Showing ' + (this.leftBase + 1) + ' to ' + this.rightBase + ' of ' + data.length + ' entries</span>';
                     this.controlLeftCol.html(showLabel);
                 }
                 this.controlRightCol.html(this.btnGroup);
