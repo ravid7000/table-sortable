@@ -1,82 +1,76 @@
-/*
- * table-sortable
- * version: 0.1.0
- * (c) Ravi Dhiman <ravid7000@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
-*/
+export const _isArray = arr => Array.isArray(arr)
 
-export function isArray(ar) {
-    return Array.isArray(ar)
-}
+export const _isNumber = num => !isNaN(num)
 
-export function isObject(obj) {
-    return typeof obj === 'object'
-}
+export const _isObject = obj => typeof obj === 'object'
 
-export function isEmpty(obj) {
-    if (isArray(obj)) {
-        return obj.length === 0
-    } else if (isObject(obj)) {
-        return Object.keys(obj).length === 0
-    }
-    return false;
-}
+export const _isFunction = fun => typeof fun === 'function'
 
-export function isFunction(fn) {
-    return fn instanceof Function;
-}
-
-export function isDate(date) {
-    return date instanceof Date;
-}
-
-export function assign(obj, obj2) {
-    return Object.assign(obj, obj2)
-}
-
-export function clone(item) {
-    if (Array.isArray(item)) {
-        return item.slice(0)
-    }
-    return JSON.parse(JSON.stringify(item))
-}
-
-export function reverse(arr) {
-    if (isArray(arr)) {
-        return arr.reverse()
-    }
-    return arr;
-}
-
-export function map(data, cb) {
-    if (isArray(data) && data.length) {
-        for (var i = 0; i < data.length; i++) {
-            data[i] = cb(data[i], i)
+export const _isDate = str => {
+    if (Object.prototype.toString.call(str) === '[object Date]') {
+        if (_isNumber(str.getTime())) {
+            return true
         }
-        return data;
-    }
-    return []
-}
-
-export function filter(data, cb) {
-    var filterdArray = []
-    if (isArray(data) && data.length) {
-        for (var i = 0; i < data.length; i++) {
-            if (cb(data[i], i)) {
-                filterdArray.push(data[i])
-            }
-        }
-        return filterdArray;
-    }
-    return filterdArray
-}
-
-export function forIn(obj, cb) {
-    if (isObject(obj)) {
-        var keys = Object.keys(obj);
-        for (var i = 0; i < keys.length; i++) {
-            cb(obj[keys[i]], keys[i])
+    } else {
+        const d = new Date(str)
+        if (_isNumber(d.getTime())) {
+            return true
         }
     }
+    return false
+}
+
+export const _isString = str => typeof str === 'string'
+
+export const _forEach = (arr, callback) => {
+    _invariant(_isArray(arr), 'ForEach requires array input')
+    if (!arr.length) {
+        return []
+    }
+
+    if (!_isFunction(callback)) {
+        callback = () => {}
+    }
+
+    let i = 0,
+        len = arr.length
+
+    while (i < len) {
+        callback(arr[i], i)
+        i += 1
+    }
+    return arr
+}
+
+export const _invariant = (condition, format, ...rest) => {
+    let error
+    if (!condition) {
+        const args = [...rest]
+        let argIndex = 0
+        error = new Error(format.replace(/%s/g, () => args[argIndex++]))
+        error.name = 'TableSortable Violation'
+        error.framesToPop = 1
+        throw error
+    }
+}
+
+export const _nativeCompare = (value, other) => {
+    if (value !== other) {
+        if (_isNumber(value)) {
+            return parseFloat(value) > parseFloat(other) ? 1 : -1
+        }
+
+        if (_isDate(value)) {
+            const d1 = new Date(value)
+            const d2 = new Date(other)
+            return d1.getTime() > d2.getTime() ? 1 : -1
+        }
+
+        if (_isString(value)) {
+            return value > other ? 1 : -1
+        }
+
+        return 1
+    }
+    return 0
 }
