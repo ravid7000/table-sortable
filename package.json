@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "node-minify": "^2.4.2"
+    "node-minify": "2.4.2"
   },
   "scripts": {
     "build": "node scripts/build.js"
