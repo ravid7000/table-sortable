@@ -69,7 +69,7 @@ class TableSortable {
         this._formatError(
             Utils._isArray(data),
             'data',
-            'table-sortable only support collection of data, like [{}]'
+            'table-sortable only supports collections. Like: [{ key: value }, { key: value }]'
         )
         const dataset = new DataSet()
         dataset.fromCollection(data)
