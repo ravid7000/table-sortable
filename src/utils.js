@@ -20,6 +20,22 @@ export const _isDate = str => {
     return false
 }
 
+export const _sort = (arr, order) => {
+    return arr.sort((a, b) => {
+        if (order === 'asc') {
+            return parseInt(a, 10) - parseInt(b, 10)
+        }
+        return parseInt(b, 10) - parseInt(a, 10)
+    })
+}
+
+export const _keys = obj => {
+    if ('keys' in Object) {
+        return Object.keys(obj)
+    }
+    return Object.getOwnPropertyNames(obj)
+}
+
 export const _isString = str => typeof str === 'string'
 
 export const _forEach = (arr, callback) => {
@@ -73,4 +89,13 @@ export const _nativeCompare = (value, other) => {
         return 1
     }
     return 0
+}
+
+export const debounce = (func, delay) => {
+    let timer
+    return function() {
+        const context = this
+        clearTimeout(timer)
+        timer = window.setTimeout(() => func.apply(context, arguments), delay)
+    }
 }

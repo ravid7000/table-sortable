@@ -6,7 +6,15 @@ function init() {
         element: '#root',
         data,
         columns,
-        rowsPerPage: 5,
+        responsive: {
+            1100: {
+                columns: {
+                    formCode: 'Form Code',
+                    formName: 'Form Name',
+                },
+            },
+        },
+        rowsPerPage: 2,
         pagination: true,
         tableWillMount: () => {
             console.log('table will mount')

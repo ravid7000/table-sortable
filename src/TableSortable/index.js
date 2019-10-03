@@ -22,7 +22,7 @@ class TableSortable {
         formatCell: null,
         formatHeader: null,
         searchField: null,
-        responsive: [],
+        responsive: {},
         totalPages: 0,
         sortingIcons: {
             asc: '<span>▼</span>',
@@ -54,6 +54,8 @@ class TableSortable {
         totalPages: 1,
         visiblePageNumbers: 5,
     }
+    _cachedOption = null
+    _cachedViewPort = -1
 
     constructor(options) {
         this.options = $.extend(this._defOptions, options)
@@ -248,7 +250,7 @@ class TableSortable {
         }
         const { columns, formatHeader } = this.options
         const cols = []
-        const colKeys = Object.keys(columns) // TODO: add legacy support
+        const colKeys = Utils._keys(columns) // TODO: add legacy support
 
         // create header
         Utils._forEach(colKeys, (part, i) => {
@@ -283,7 +285,7 @@ class TableSortable {
             currentPageData = this._dataset.get(from, to)
         }
         const rows = [] // list of rows in body
-        const colKeys = Object.keys(columns) // TODO: add legacy support
+        const colKeys = Utils._keys(columns) // TODO: add legacy support
 
         // create body
         Utils._forEach(currentPageData, function(part, i) {
@@ -341,7 +343,17 @@ class TableSortable {
         const self = this
         const engine = this.engine
         const { pagination, paginationContainer, prevText, nextText } = this.options
-        const { currentPage, totalPages } = this._pagination
+        const { currentPage, totalPages, visiblePageNumbers } = this._pagination
+        const visiblePages = Math.min(totalPages, visiblePageNumbers)
+        let visibleLeft = 0
+        let visibleRight = Math.min(totalPages, visibleLeft + visiblePages)
+        if (currentPage > visiblePages / 2 && currentPage < totalPages - visiblePages / 2) {
+            visibleLeft = currentPage - Math.floor(visiblePages / 2)
+            visibleRight = Math.min(totalPages, visibleLeft + visiblePages)
+        } else if (currentPage > totalPages - visiblePages / 2) {
+            visibleLeft = totalPages - visiblePages
+            visibleRight = totalPages
+        }
         if (!parentElm) {
             parentElm = $('<div class="gs-pagination"></div>')
             if ($(paginationContainer).length) {
@@ -363,9 +375,18 @@ class TableSortable {
             onClick: () => self.onPaginationBtnClick('down'),
         })
         buttons.push(prevBtn)
+        const btnDots = engine.createElement('button', {
+            className: 'btn btn-default',
+            disabled: true,
+            text: '...',
+        })
 
-        let i = 0
-        while (i < totalPages) {
+        if (currentPage > visiblePages / 2) {
+            buttons.push(btnDots)
+        }
+
+        let i = visibleLeft
+        while (i < visibleRight) {
             const btn = engine.createElement('button', {
                 className: currentPage === i ? 'btn btn-primary active' : 'btn btn-default',
                 onClick: function() {
@@ -380,6 +401,10 @@ class TableSortable {
             })
             buttons.push(btn)
             i += 1
+        }
+
+        if (currentPage < totalPages - visiblePages / 2) {
+            buttons.push(btnDots)
         }
 
         const nextBtn = engine.createElement('button', {
@@ -493,6 +518,9 @@ class TableSortable {
         this.createPagination()
         this._isMounted = true
         this.emitLifeCycles('tableDidMount')
+        if (this._cachedViewPort === -1) {
+            this.resizeSideEffect()
+        }
     }
 
     /**
@@ -531,16 +559,49 @@ class TableSortable {
         this.emitLifeCycles('tableDidUpdate')
     }
 
+    resizeSideEffect() {
+        const mkRes = Utils.debounce(this.makeResponsive, 500)
+        window.addEventListener('resize', mkRes.bind(this))
+        this.makeResponsive()
+    }
+
     makeResponsive() {
         const { responsive } = this.options
         const { innerWidth } = window
+        const keys = Utils._sort(Utils._keys(responsive), 'desc')
+        let minPort
 
-        Utils._forEach(responsive, viewPort => {
-            viewPort = parseInt(viewPort, 10)
-            if (innerWidth >= viewPort) {
-                //
+        this.logError(
+            Utils._isObject(responsive),
+            'responsive',
+            'Invalid type of responsive option provided: "%s"',
+            responsive
+        )
+
+        Utils._forEach(keys, viewPort => {
+            if (parseInt(viewPort, 10) > innerWidth) {
+                minPort = viewPort
             }
         })
+
+        if (this._cachedViewPort === minPort) {
+            return
+        }
+        this._cachedViewPort = minPort
+        const resOptions = responsive[minPort]
+        if (Utils._isObject(resOptions)) {
+            if (!this._cachedOption) {
+                this._cachedOption = $.extend({}, this.options)
+            }
+            this.options = $.extend(this.options, resOptions)
+            this.refresh()
+        } else if (this._cachedOption) {
+            this.options = $.extend({}, this._cachedOption)
+            this._cachedOption = null
+            this._cachedViewPort = -1
+            this.refresh()
+        }
+        return
     }
 
     /**
@@ -620,6 +681,8 @@ class TableSortable {
                 currentCol: '',
                 dir: '',
             }
+            this._cachedViewPort = -1
+            this._cachedOption = null
             this.emitLifeCycles('tableDidUnmount')
         }
     }
