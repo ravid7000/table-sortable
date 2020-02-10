@@ -1,6 +1,6 @@
 # Table Sortable
 
-A jquery plugin to sort and paginate data in table form.
+A jquery plugin to sort and paginate data in table form. This branch is kept for `version 1` of `Table Sortable`. If you want to use `v2` or `latest` use `master` branch.
 
 ### Requirements
 ##### Dependencies
