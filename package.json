@@ -13,6 +13,8 @@
   "scripts": {
     "start": "node scripts/start.js",
     "bundle": "webpack --config config/webpack.bundle.js",
+    "publish": "node ./publish.js",
+    "prepublish": "npm run bundle",
     "test": "node scripts/test.js"
   },
   "author": "Ravi Dhiman",
@@ -85,6 +87,7 @@
     "workbox-webpack-plugin": "3.6.3"
   },
   "devDependencies": {
+    "gh-pages": "^2.2.0",
     "tslint": "^5.13.1",
     "typescript": "^3.3.3333",
     "webpack-cli": "^3.3.10"
