@@ -6,11 +6,82 @@
     <title>Table Sortable</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="bootstrap.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../dist/table-sortable.css">
+    <script src="jquery.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Table sortable page</h1>
+    <div class="page-container">
+        <div class="container">
+            <h1 class="display-4">Table Sortable</h1>
+            <h5>A jquery plugin to sort and paginate data in table form</h5>
+            <h6>
+                <a href="story-latest.html">View full documentation</a>
+            </h6>
+            <div class="row mt-5 mb-3">
+                <div class="col-md-6">
+                    <button class="btn btn-primary btn-sm" id="rerender">Re-Render</button>
+                    <button class="btn btn-primary btn-sm" id="distory">Distory</button>
+                    <button class="btn btn-primary btn-sm" id="refresh">Refresh</button>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-end">
+                        <span class="pr-3">Rows Per Page:</span>
+                        <select name="rowsPerPage" id="changeRows">
+                            <option value="1">1</option>
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="root"></div>
+        </div>
     </div>
+    <script src="data.js"></script>
+    <script src="../dist/table-sortable.js"></script>
+    <script>
+        var table = $('#root').tableSortable({
+            data,
+            columns,
+            responsive: {
+                1100: {
+                    columns: {
+                        formCode: 'Form Code',
+                        formName: 'Form Name',
+                    },
+                },
+            },
+            rowsPerPage: 5,
+            pagination: true,
+            tableWillMount: () => {
+                console.log('table will mount')
+            },
+            tableDidMount: () => {
+                console.log('table did mount')
+            },
+            tableWillUpdate: () => console.log('table will update'),
+            tableDidUpdate: () => console.log('table did update'),
+            tableWillUnmount: () => console.log('table will unmount'),
+            tableDidUnmount: () => console.log('table did unmount'),
+        });
+
+        $('#changeRows').on('change', function() {
+            table.updateRowsPerPage(parseInt($(this).val(), 10));
+        })
+        
+        $('#rerender').click(function() {
+            table.refresh(true);
+        })
+
+        $('#distory').click(function() {
+            table.distroy();
+        })
+
+        $('#refresh').click(function() {
+            table.refresh();
+        })
+    </script>
 </body>
 </html>

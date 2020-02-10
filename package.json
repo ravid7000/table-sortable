@@ -12,7 +12,7 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
+    "bundle": "webpack --config config/webpack.bundle.js",
     "test": "node scripts/test.js"
   },
   "author": "Ravi Dhiman",
@@ -86,7 +86,8 @@
   },
   "devDependencies": {
     "tslint": "^5.13.1",
-    "typescript": "^3.3.3333"
+    "typescript": "^3.3.3333",
+    "webpack-cli": "^3.3.10"
   },
   "jest": {
     "collectCoverageFrom": [

@@ -14,7 +14,7 @@ function init() {
                 },
             },
         },
-        rowsPerPage: 2,
+        rowsPerPage: 10,
         pagination: true,
         tableWillMount: () => {
             console.log('table will mount')

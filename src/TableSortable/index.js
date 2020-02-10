@@ -119,6 +119,30 @@ class TableSortable {
         }
     }
 
+    setPage(pageNo, data) {
+        this.logError(Utils._isNumber(pageNo), 'setPage', 'expect argument as number')
+        if (pageNo) {
+            this._pagination.currentPage = pageNo
+            if (data) {
+                this._dataset.pushData(data)
+            }
+            this.updateTable()
+        }
+    }
+
+    updateRowsPerPage(rowsPerPage) {
+        this.logError(
+            Utils._isNumber(rowsPerPage),
+            'updateRowsPerPage',
+            'expect argument as number'
+        )
+        if (rowsPerPage) {
+            this._pagination.currentPage = 0 // Reset pagination
+            this.options.rowsPerPage = rowsPerPage
+            this.updateTable()
+        }
+    }
+
     /**
      * _validateRootElement
      */
@@ -322,6 +346,7 @@ class TableSortable {
 
     onPaginationBtnClick(dir, currPage) {
         let { totalPages, currentPage } = this._pagination
+        const { onPaginationChange } = this.options
         if (dir === 'up') {
             if (currentPage < totalPages - 1) {
                 currentPage += 1
@@ -331,12 +356,16 @@ class TableSortable {
                 currentPage -= 1
             }
         }
-        if (currPage !== undefined) {
-            this._pagination.currentPage = currPage
+        if (Utils._isFunction(onPaginationChange)) {
+            onPaginationChange.apply(this, [currentPage, this.setPage])
         } else {
-            this._pagination.currentPage = currentPage
+            if (currPage !== undefined) {
+                this._pagination.currentPage = currPage
+            } else {
+                this._pagination.currentPage = currentPage
+            }
+            this.updateTable()
         }
-        this.updateTable()
     }
 
     renderPagination(parentElm) {
@@ -426,12 +455,19 @@ class TableSortable {
             },
             showLabel
         )
+        const btnWrapper = engine.createElement(
+            'div',
+            {
+                className: 'btn-group d-flex justify-content-end',
+            },
+            buttons
+        )
         const pageColRight = engine.createElement(
             'div',
             {
-                className: 'col-md-6 btn-group',
+                className: 'col-md-6',
             },
-            buttons
+            btnWrapper
         )
         const pageRow = engine.createElement(
             'div',
@@ -466,7 +502,6 @@ class TableSortable {
             totalP = 1
         }
         this._pagination.totalPages = totalP
-        this._pagination.currentPage = 0
         if (this._pagination.elm) {
             this.renderPagination(this._pagination.elm)
         } else {
@@ -537,11 +572,11 @@ class TableSortable {
             return
         }
 
-        this._isUpdating = true
         this.emitLifeCycles('tableWillUpdate')
+        this._isUpdating = true
         this._renderHeader(this._thead)
         this._renderBody(this._tbody)
-        this.renderPagination(this._pagination.elm)
+        this.createPagination()
         this._isUpdating = false
         this.emitLifeCycles('tableDidUpdate')
     }
@@ -607,9 +642,18 @@ class TableSortable {
     /**
      * public APIs
      */
-    setData = data => {
-        if (this._isMounted) {
-            this._dataset.fromCollection(data)
+    setData = (data, columns, pushData) => {
+        this.logError(Utils._isArray(data), 'setData', 'expect first argument as array of objects')
+        this.logError(Utils._isObject(columns), 'setData', 'expect second argument as objects')
+        if (this._isMounted && data) {
+            if (pushData) {
+                this._dataset.pushData(data)
+            } else {
+                this._dataset.fromCollection(data)
+            }
+            if (columns) {
+                this.options.columns = columns
+            }
             this.refresh()
         }
     }
@@ -696,6 +740,19 @@ class TableSortable {
             this.init()
         }
     }
+}
+
+if (process.env.NODE_ENV === 'production') {
+    window.Pret = Pret()
+    window.TableSortable = TableSortable
+    window.DataSet = DataSet
+    ;(function($) {
+        $.fn.tableSortable = function(options) {
+            options.element = $(this)
+            return new window.TableSortable(options)
+        }
+        // eslint-disable-next-line no-undef
+    })(jQuery)
 }
 
 export default TableSortable

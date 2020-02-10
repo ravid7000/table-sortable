@@ -91,6 +91,12 @@ class DataSet {
         }
         return this.top(this._datasetLen)
     }
+
+    pushData(data) {
+        if (Utils._isArray(data)) {
+            Array.prototype.push.apply(this.dataset, data)
+        }
+    }
 }
 
 export default DataSet
