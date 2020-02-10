@@ -121,7 +121,7 @@ class TableSortable {
 
     setPage(pageNo, data) {
         this.logError(Utils._isNumber(pageNo), 'setPage', 'expect argument as number')
-        if (pageNo) {
+        if (!isNaN(pageNo)) {
             this._pagination.currentPage = pageNo
             if (data) {
                 this._dataset.pushData(data)
@@ -356,8 +356,10 @@ class TableSortable {
                 currentPage -= 1
             }
         }
+        const setPage = pageNo => this.setPage(pageNo)
         if (Utils._isFunction(onPaginationChange)) {
-            onPaginationChange.apply(this, [currentPage, this.setPage])
+            const cp = !isNaN(currPage) ? currPage : currentPage
+            onPaginationChange.apply(this, [cp, setPage])
         } else {
             if (currPage !== undefined) {
                 this._pagination.currentPage = currPage

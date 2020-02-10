@@ -158,10 +158,10 @@
                         Add script link to your html file. Make sure to add table-sortable.js after jquery.
                     </p>
                     <pre>
-                        <code class="html">&lt;link src="https://cdn.jsdelivr.net/gh/ravid7000/table-sortable/dist/table-sortable.css" /&gt;
+                        <code class="html">&lt;link src="https://raw.githubusercontent.com/ravid7000/table-sortable/master/dist/table-sortable.css" /&gt;
 
 &lt;script src="../jquery.min.js"&gt;&lt;/script&gt;
-&lt;script src="https://cdn.jsdelivr.net/gh/ravid7000/table-sortable/dist/table-sortable.js"&gt;&lt;/script&gt;</code>
+&lt;script src="https://raw.githubusercontent.com/ravid7000/table-sortable/master/dist/table-sortable.js"&gt;&lt;/script&gt;</code>
                     </pre>
                 </section>
                 <section id="how-to-use">
@@ -519,11 +519,13 @@ var table = $('#table-sortable').tableSortable({
                     </p>
                     <pre>
                         <code class="js">
-// TODO
 var table = $('#table-sortable').tableSortable({
     ...
-    onPaginationChange: function(nextPage, currentPage) {
+    onPaginationChange: function(nextPage, setPage) {
         // Call api to get data for nextPage. And finally update table data;
+        $.get(/* url */, function(data) {
+            setPage(nextPage, data);
+        })
     },
     ...
 });

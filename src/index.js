@@ -14,7 +14,7 @@ function init() {
                 },
             },
         },
-        rowsPerPage: 10,
+        rowsPerPage: 5,
         pagination: true,
         tableWillMount: () => {
             console.log('table will mount')
@@ -26,6 +26,9 @@ function init() {
         tableDidUpdate: () => console.log('table did update'),
         tableWillUnmount: () => console.log('table will unmount'),
         tableDidUnmount: () => console.log('table did unmount'),
+        onPaginationChange: function(nextPage) {
+            this.setPage(nextPage)
+        },
     })
 }
 

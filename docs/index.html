@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="bootstrap.min.css">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="../dist/table-sortable.css">
+    <link rel="stylesheet" href="https://raw.githubusercontent.com/ravid7000/table-sortable/master/dist/table-sortable.css">
     <script src="jquery.min.js"></script>
 </head>
 <body>
@@ -37,6 +37,9 @@
                 </div>
             </div>
             <div id="root"></div>
+            <div class="mt-4">
+                <button class="btn btn-secondary" id="setPage2">Set Page 2</button>
+            </div>
         </div>
     </div>
     <script src="data.js"></script>
@@ -65,6 +68,9 @@
             tableDidUpdate: () => console.log('table did update'),
             tableWillUnmount: () => console.log('table will unmount'),
             tableDidUnmount: () => console.log('table did unmount'),
+            onPaginationChange: function(nextPage, setPage) {
+                setPage(nextPage);
+            }
         });
 
         $('#changeRows').on('change', function() {
@@ -81,6 +87,10 @@
 
         $('#refresh').click(function() {
             table.refresh();
+        })
+
+        $('#setPage2').click(function() {
+            table.setPage(1);
         })
     </script>
 </body>

@@ -8,6 +8,7 @@ const branch = branchName(pkg.version)
 
 const options = {
     branch,
+    dest: 'build',
     tag: tag(pkg.version),
     message: message(pkg.version, branch),
 }
