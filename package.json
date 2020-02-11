@@ -13,7 +13,8 @@
   "scripts": {
     "start": "node scripts/start.js",
     "bundle": "webpack --config config/webpack.bundle.js",
-    "publish": "node ./publish.js",
+    "postbundle": "node ./scripts/postbundle.js",
+    "publish": "node ./scripts/publish.js",
     "prepublish": "npm run bundle",
     "test": "node scripts/test.js"
   },

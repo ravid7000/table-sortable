@@ -17,6 +17,7 @@
   z-index: 100;
   overflow: auto;
   border-right: solid 1px #f1f1f1;
+  background-color: #F5F7F9;
 }
 
 .story-container .story-logo {
@@ -76,6 +77,7 @@ section#intro {
 
 pre > code {
   padding: 32px !important;
+  background-color: #F5F7F9 !important;
 }
 
 code {
