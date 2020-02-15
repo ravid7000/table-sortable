@@ -1,3 +1,21 @@
+html {
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  display: none;
+}
+
+::-webkit-scrollbar-thumb {
+  -webkit-box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.12);
+  background-color: rgb(206, 206, 206);
+  outline: 1px solid slategrey;
+}
+
 .container-fluid {
   padding-left: 32px;
   padding-right: 32px;
