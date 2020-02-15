@@ -1,5 +1,5 @@
 # Table Sortable
-A jquery plugin to sort and paginate data in table form. [View full documentation](https://ravid7000.github.io/table-sortable/story-latest.html) [View demo](https://ravid7000.github.io/table-sortable/)
+A jquery plugin to sort and paginate data in table form. [View full documentation](https://table-sortable.now.sh/story-latest.html) [View demo](https://table-sortable.now.sh/)
 
 For version 1, See `v1` branch of this repo.
 
