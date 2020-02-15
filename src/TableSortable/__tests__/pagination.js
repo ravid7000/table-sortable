@@ -138,4 +138,33 @@ describe('Table Sortable Pagination:', () => {
             .find('button')
         expect($(buttons[buttons.length - 1]).attr('disabled')).toStrictEqual('disabled')
     })
+    test('button should have active class for currentPage', () => {
+        new TableSortable({
+            element: rootElm,
+            data,
+            columns,
+        })
+        const buttons = $(rootElm)
+            .find('.gs-pagination')
+            .find('button')
+        expect($(buttons[1]).hasClass('active')).toStrictEqual(true)
+    })
+    test('buttons should have data-page attribute', () => {
+        new TableSortable({
+            element: rootElm,
+            data,
+            columns,
+        })
+        const buttons = $(rootElm)
+            .find('.gs-pagination')
+            .find('button')
+        const totalButton = buttons.length - 3
+        const hasDataPageFor = []
+        Array.from(buttons).forEach(btn => {
+            if ($(btn).attr('data-page')) {
+                hasDataPageFor.push($(btn).attr('data-page'))
+            }
+        })
+        expect(totalButton).toStrictEqual(hasDataPageFor.length)
+    })
 })

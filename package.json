@@ -4,7 +4,7 @@
   "description": "A jquery plugin to sort and paginate data in table form",
   "main": "dist/table-sortable.js",
   "engines": {
-    "node": "^8.x"
+    "node": "^12.x"
   },
   "repository": {
     "url": "https://github.com/ravid7000/table-sortable",

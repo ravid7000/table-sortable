@@ -1,17 +1,19 @@
 export const _isArray = arr => Array.isArray(arr)
 
-export const _isNumber = num => !isNaN(num)
+export const _isNumber = num => typeof num === 'number'
 
 export const _isObject = obj => typeof obj === 'object'
 
 export const _isFunction = fun => typeof fun === 'function'
+
+export const _isString = str => typeof str === 'string'
 
 export const _isDate = str => {
     if (Object.prototype.toString.call(str) === '[object Date]') {
         if (_isNumber(str.getTime())) {
             return true
         }
-    } else {
+    } else if (_isString(str)) {
         const d = new Date(str)
         if (_isNumber(d.getTime())) {
             return true
@@ -35,8 +37,6 @@ export const _keys = obj => {
     }
     return Object.getOwnPropertyNames(obj)
 }
-
-export const _isString = str => typeof str === 'string'
 
 export const _forEach = (arr, callback) => {
     _invariant(_isArray(arr), 'ForEach requires array input')
