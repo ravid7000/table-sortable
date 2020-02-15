@@ -80,4 +80,22 @@ describe('Utils:', () => {
             )
         }
     })
+    test('check _nativeCompare', () => {
+      expect(typeof Utils._nativeCompare).toStrictEqual('function')
+      expect(Utils._nativeCompare('a', 'a')).toStrictEqual(0)
+      expect(Utils._nativeCompare(1, 1)).toStrictEqual(0)
+      expect(Utils._nativeCompare(1, 2)).toStrictEqual(-1)
+      expect(Utils._nativeCompare(3, 2)).toStrictEqual(1)
+      expect(Utils._nativeCompare(new Date(), new Date())).toStrictEqual(-1)
+    })
+    test('check debounce', () => {
+      jest.useFakeTimers()
+      const callBack = jest.fn()
+      Utils.debounce(callBack, 1000)()
+      expect(callBack).not.toBeCalled()
+      jest.runAllTimers()
+      expect(typeof Utils.debounce).toStrictEqual('function')
+      expect(callBack).toBeCalled()
+      expect(callBack).toHaveBeenCalledTimes(1)
+    })
 })
