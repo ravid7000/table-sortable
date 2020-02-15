@@ -19,6 +19,4 @@ steps:
     npm install -g webpack webpack-cli --save-dev
     npm install
     npm run test -- --no-watch
-    npm run test -- --coverage
-    npx webpack --config config/webpack.bundle.js
   displayName: 'npm install, npm test, run webpack'
