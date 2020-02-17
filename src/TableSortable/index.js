@@ -38,6 +38,7 @@ class TableSortable {
         tableDidUnmount: () => {},
         onPaginationChange: null,
     }
+    _styles = null
     _dataset = null
     _table = null
     _thead = null
@@ -64,6 +65,7 @@ class TableSortable {
         this.engine = Pret()
         this.optionDepreciation()
         this.init()
+        this._debounceUpdateTable()
     }
 
     optionDepreciation() {
@@ -121,7 +123,8 @@ class TableSortable {
 
     setPage(pageNo, data) {
         this.logError(Utils._isNumber(pageNo), 'setPage', 'expect argument as number')
-        if (!isNaN(pageNo)) {
+        const { totalPages } = this._pagination
+        if (Utils._isNumber(pageNo) && Utils._inRange(pageNo, [0, totalPages])) {
             this._pagination.currentPage = pageNo
             if (data) {
                 this._dataset.pushData(data)
@@ -141,6 +144,41 @@ class TableSortable {
             this.options.rowsPerPage = rowsPerPage
             this.updateTable()
         }
+    }
+
+    lookUp(val, cols = []) {
+        const { columns } = this.options
+        this.logError(
+            cols && Utils._isArray(cols),
+            'lookUp',
+            'second argument must be array of keys'
+        )
+        if (!cols.length) {
+            cols = columns
+        }
+        this._pagination.currentPage = 0
+        this._dataset.lookUp(val, Utils._keys(cols))
+        this.debounceUpdateTable()
+    }
+
+    _bindSearchField() {
+        const self = this
+        const { searchField } = this.options
+        if (!searchField) {
+            return
+        }
+        const field = $(searchField)
+        this.logError(
+            field.length,
+            'searchField',
+            '"%s" is not a valid DOM element or string',
+            field
+        )
+        field.on('input', function() {
+            const val = $(this).val()
+            self.lookUp(val)
+        })
+        this.options.searchField = field
     }
 
     /**
@@ -253,6 +291,7 @@ class TableSortable {
      * @returns {{ from: Number, to: Number? }} obj
      */
     getCurrentPageIndex() {
+        const { _datasetLen } = this._dataset
         const { pagination, rowsPerPage } = this.options
         const { currentPage } = this._pagination // current page in pagination
         if (!pagination) {
@@ -260,8 +299,9 @@ class TableSortable {
                 from: 0,
             }
         }
-        const from = currentPage * rowsPerPage // list start index
-        const to = from + rowsPerPage
+        let from = currentPage * rowsPerPage // list start index
+        const to = Math.min(from + rowsPerPage, _datasetLen)
+        from = Math.min(from, to)
         return {
             from,
             to,
@@ -448,7 +488,7 @@ class TableSortable {
         parentElm.append(buttons)
         const { from, to } = this.getCurrentPageIndex()
         const showLabel = engine.createElement('span', {
-            text: `Showing ${from + 1} to ${to}`,
+            text: `Showing ${Math.min(to, from + 1)} to ${to} of ${this._dataset._datasetLen} rows`,
         })
         const pageColLeft = engine.createElement(
             'div',
@@ -539,6 +579,20 @@ class TableSortable {
         }
     }
 
+    _initStyles() {
+        const { responsive } = this.options
+        if (responsive) {
+            return
+        }
+        const css =
+            '.gs-table-container .table{table-layout:fixed}@media(max-width:767px){.gs-table-container{overflow:auto;max-width:100%}}'
+        const style = $('<style></style>')
+        style.attr('id', 'gs-table')
+        style.html(css)
+        $('head').append(style)
+        this._styles = style
+    }
+
     /**
      * init
      * @description Initial rendering
@@ -553,6 +607,8 @@ class TableSortable {
         this._generateTable(thead, tbody)
         this._renderTable()
         this.createPagination()
+        this._bindSearchField()
+        this._initStyles()
         this._isMounted = true
         this.emitLifeCycles('tableDidMount')
         if (this._cachedViewPort === -1) {
@@ -568,6 +624,10 @@ class TableSortable {
      *
      * Updation phase will not distroy table completely. It will re-render table cells and pagination.
      */
+
+    _debounceUpdateTable() {
+        this.debounceUpdateTable = Utils.debounce(this.updateTable, 400)
+    }
 
     updateTable() {
         if (this._isUpdating) {
@@ -708,6 +768,10 @@ class TableSortable {
         if (this._isMounted) {
             this.emitLifeCycles('tableWillUnmount')
             this._table.remove()
+            if (this._styles && this._styles.length) {
+                this._styles.remove()
+                this._styles = null
+            }
             this._dataset = null
             this._table = null
             this._thead = null

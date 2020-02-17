@@ -81,21 +81,61 @@ describe('Utils:', () => {
         }
     })
     test('check _nativeCompare', () => {
-      expect(typeof Utils._nativeCompare).toStrictEqual('function')
-      expect(Utils._nativeCompare('a', 'a')).toStrictEqual(0)
-      expect(Utils._nativeCompare(1, 1)).toStrictEqual(0)
-      expect(Utils._nativeCompare(1, 2)).toStrictEqual(-1)
-      expect(Utils._nativeCompare(3, 2)).toStrictEqual(1)
-      expect(Utils._nativeCompare(new Date(), new Date())).toStrictEqual(-1)
+        expect(typeof Utils._nativeCompare).toStrictEqual('function')
+        expect(Utils._nativeCompare('a', 'a')).toStrictEqual(0)
+        expect(Utils._nativeCompare(1, 1)).toStrictEqual(0)
+        expect(Utils._nativeCompare(1, 2)).toStrictEqual(-1)
+        expect(Utils._nativeCompare(3, 2)).toStrictEqual(1)
+        expect(Utils._nativeCompare(new Date(), new Date())).toStrictEqual(-1)
     })
     test('check debounce', () => {
-      jest.useFakeTimers()
-      const callBack = jest.fn()
-      Utils.debounce(callBack, 1000)()
-      expect(callBack).not.toBeCalled()
-      jest.runAllTimers()
-      expect(typeof Utils.debounce).toStrictEqual('function')
-      expect(callBack).toBeCalled()
-      expect(callBack).toHaveBeenCalledTimes(1)
+        jest.useFakeTimers()
+        const callBack = jest.fn()
+        Utils.debounce(callBack, 1000)()
+        expect(callBack).not.toBeCalled()
+        jest.runAllTimers()
+        expect(typeof Utils.debounce).toStrictEqual('function')
+        expect(callBack).toBeCalled()
+        expect(callBack).toHaveBeenCalledTimes(1)
+    })
+    test('check lookInObject', () => {
+        const obj = {
+            formCode: 531790,
+            formName: 'Investment Form 2',
+            fullName: 'Test User',
+            appointmentDate: '12 March, 2017',
+            appointmentTime: '1:35PM',
+            phone: '9876543210',
+        }
+
+        expect(typeof Utils.lookInObject).toStrictEqual('function')
+        expect(Utils.lookInObject(obj, 531790)).toStrictEqual(true)
+        expect(Utils.lookInObject(obj, 'Investment Form 2')).toStrictEqual(true)
+        expect(Utils.lookInObject(obj, '1:')).toStrictEqual(true)
+        expect(Utils.lookInObject(obj, '9')).toStrictEqual(true)
+        expect(Utils.lookInObject(obj, '')).toStrictEqual(false)
+        expect(Utils.lookInObject(obj, 0)).toStrictEqual(true)
+        expect(Utils.lookInObject(obj, null)).toStrictEqual(false)
+        expect(Utils.lookInObject(obj, 100)).toStrictEqual(false)
+        expect(Utils.lookInObject(obj, 2017)).toStrictEqual(true)
+    })
+    test('check _filter', () => {
+        const data = [1, 2, 3, 4, 5, 6]
+        expect(typeof Utils._filter).toStrictEqual('function')
+        expect(Utils._filter(data, d => d % 2 === 0)).toStrictEqual([2, 4, 6])
+        expect(Utils._filter(data, d => d % 2 !== 0)).toStrictEqual([1, 3, 5])
+        expect(Utils._filter(data)).toStrictEqual(data)
+        try {
+            Utils._filter()
+        } catch (err) {
+            expect(err.message).toStrictEqual('_filter requires array input')
+        }
+    })
+    test('check _inRange', () => {
+        const range = [0, 10]
+        expect(typeof Utils._inRange).toStrictEqual('function')
+        expect(Utils._inRange(2, range)).toStrictEqual(true)
+        expect(Utils._inRange(10, range)).toStrictEqual(false)
+        expect(Utils._inRange(0, range)).toStrictEqual(true)
     })
 })

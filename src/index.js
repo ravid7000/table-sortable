@@ -1,9 +1,11 @@
+import $ from 'jquery'
 import TableSortable from './TableSortable'
 import { data, columns } from './data'
 
 function init() {
-    new TableSortable({
+    const table = new TableSortable({
         element: '#root',
+        searchField: '#searchInput',
         data,
         columns,
         responsive: {
@@ -16,19 +18,17 @@ function init() {
         },
         rowsPerPage: 5,
         pagination: true,
-        tableWillMount: () => {
-            console.log('table will mount')
-        },
-        tableDidMount: () => {
-            console.log('table did mount')
-        },
-        tableWillUpdate: () => console.log('table will update'),
-        tableDidUpdate: () => console.log('table did update'),
-        tableWillUnmount: () => console.log('table will unmount'),
-        tableDidUnmount: () => console.log('table did unmount'),
         onPaginationChange: function(nextPage) {
             this.setPage(nextPage)
         },
+    })
+
+    $('#searchInput').on('input', function() {
+        table.lookUp($(this).val())
+    })
+
+    $('#setPage').on('click', function() {
+        table.setPage(2)
     })
 }
 

@@ -17,16 +17,21 @@
             <h6>
                 <a href="story-latest.html">View full documentation</a>
             </h6>
-            <div class="row mt-5 mb-3">
-                <div class="col-md-6">
+            <div class="row mt-5 mb-3 align-items-center">
+                <div class="col-md-5">
                     <button class="btn btn-primary btn-sm" id="rerender">Re-Render</button>
                     <button class="btn btn-primary btn-sm" id="distory">Distory</button>
                     <button class="btn btn-primary btn-sm" id="refresh">Refresh</button>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-3">
+                  <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
+                </div>
+                <div class="col-md-2 text-right">
+                  <span class="pr-3">Rows Per Page:</span>
+                </div>
+                <div class="col-md-2">
                     <div class="d-flex justify-content-end">
-                        <span class="pr-3">Rows Per Page:</span>
-                        <select name="rowsPerPage" id="changeRows">
+                        <select class="custom-select" name="rowsPerPage" id="changeRows">
                             <option value="1">1</option>
                             <option value="5" selected>5</option>
                             <option value="10">10</option>
@@ -47,6 +52,7 @@
         var table = $('#root').tableSortable({
             data,
             columns,
+            searchField: '#searchField',
             responsive: {
                 1100: {
                     columns: {

@@ -3,6 +3,7 @@ import * as Utils from '../utils'
 class DataSet {
     _name = 'dataset'
     dataset = null
+    _cachedData = null
     _datasetLen = 0
     _outLen = 10
     sortDirection = {
@@ -29,6 +30,7 @@ class DataSet {
             'Requires dataset to be a collection, like [{ }]'
         )
         this.dataset = data
+        this._cachedData = JSON.stringify(data)
         this._datasetLen = data.length
     }
 
@@ -95,6 +97,20 @@ class DataSet {
     pushData(data) {
         if (Utils._isArray(data)) {
             Array.prototype.push.apply(this.dataset, data)
+        }
+    }
+
+    lookUp(str, columns) {
+        if (Utils._isString(str) || Utils._isNumber(str)) {
+            const cachedData = JSON.parse(this._cachedData)
+            if (str === '') {
+                this.dataset = cachedData
+            } else {
+                this.dataset = Utils._filter(cachedData, item =>
+                    Utils.lookInObject(item, str, columns)
+                )
+            }
+            this._datasetLen = this.dataset.length
         }
     }
 }

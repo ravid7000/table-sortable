@@ -52,10 +52,33 @@ export const _forEach = (arr, callback) => {
         len = arr.length
 
     while (i < len) {
-        callback(arr[i], i)
+        callback.apply(null, [arr[i], i])
         i += 1
     }
     return arr
+}
+
+export const _filter = (arr, callback) => {
+    _invariant(_isArray(arr), '_filter requires array input')
+    if (!arr.length) {
+        return []
+    }
+
+    if (!_isFunction(callback)) {
+        return arr
+    }
+
+    let i = 0,
+        len = arr.length,
+        farr = []
+
+    while (i < len) {
+        if (callback.apply(null, [arr[i], i])) {
+            farr.push(arr[i])
+        }
+        i += 1
+    }
+    return farr
 }
 
 export const _invariant = (condition, format, ...rest) => {
@@ -94,8 +117,43 @@ export const _nativeCompare = (value, other) => {
 export const debounce = (func, delay) => {
     let timer
     return function() {
-        const context = this
         clearTimeout(timer)
-        timer = window.setTimeout(() => func.apply(context, arguments), delay)
+        timer = window.setTimeout(() => func.apply(this, arguments), delay)
     }
+}
+
+export const _lower = str => {
+    return _isString(str) ? str.toLowerCase() : String(str)
+}
+
+export const lookInObject = (obj, str, columns = []) => {
+    if (!str && !_isNumber(str)) {
+        return false
+    }
+    const keys = _keys(obj)
+    if (!_isArray(columns)) {
+        columns = keys
+    }
+    let i = 0,
+        len = keys.length,
+        found = false
+    const source = _lower(str)
+    while (i < len) {
+        const item = keys[i]
+        const dest = _lower(obj[item])
+        if (columns.length && columns.indexOf(item) > -1 && dest.indexOf(source) > -1) {
+            found = true
+            break
+        }
+        if (!columns.length && dest.indexOf(source) > -1) {
+            found = true
+            break
+        }
+        i += 1
+    }
+    return found
+}
+
+export const _inRange = (a, range) => {
+    return _isArray(range) && range[0] <= a && range[1] > a
 }
