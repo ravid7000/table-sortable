@@ -53,6 +53,9 @@
                     <a href="#columns">columns</a>
                 </li>
                 <li>
+                    <a href="#searchField">searchField</a>
+                </li>
+                <li>
                     <a href="#rowsPerPage">rowsPerPage</a>
                 </li>
                 <li>
@@ -132,6 +135,9 @@
                 </li>
                 <li>
                     <a href="#setData">setData</a>
+                </li>
+                <li>
+                    <a href="#lookUp">lookUp</a>
                 </li>
                 <li>
                     <a href="#getCurrentPageData">getCurrentPageData</a>
@@ -323,6 +329,21 @@ var table = $('#table-sortable').tableSortable({
         appointmentTime: 'Appointment Time',
         phone: 'Phone',
     }
+    ...
+});
+                        </code>
+                    </pre>
+                </section>
+
+                <section id="searchField">
+                    <h3>Option: <code>searchField</code></h3>
+                    <p>Type: DOM Element | jQueryElement | HTMLElementString</p>
+                    <p>Add search on table data. It will trigger table update with debounce of 0.4s. Default is <code>null</code>.</p>
+                    <pre>
+                        <code class="js">
+var table = $('#table-sortable').tableSortable({
+    ...
+    searchField: '#searchField',
     ...
 });
                         </code>
@@ -871,6 +892,22 @@ table.setData(data, columns /* optional */);
 
 // Add data in existing data
 table.setData(partialData, null, true);
+                        </code>
+                    </pre>
+                </section>
+
+                <section id="lookUp">
+                    <h3>Property: <code>lookUp</code></h3>
+                    <p>Type: function</p>
+                    <p>
+                        Implement external search or filter on table. First argument for the method is search string and secound argument is array of columns, it is optional. By default it lookup in all visible columns.
+                        Default is <code>function</code>.
+                    </p>
+                    <pre>
+                        <code class="js">
+var table = $('#root').tableSortable({...});
+
+table.lookUp('search string', /* optional */ ['column1', 'column2', 'column3']);
                         </code>
                     </pre>
                 </section>
