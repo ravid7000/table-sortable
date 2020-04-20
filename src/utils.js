@@ -1,6 +1,6 @@
 export const _isArray = arr => Array.isArray(arr)
 
-export const _isNumber = num => typeof num === 'number'
+export const _isNumber = num => typeof num === 'number' && !isNaN(num)
 
 export const _isObject = obj => typeof obj === 'object'
 
