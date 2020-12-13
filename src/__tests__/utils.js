@@ -43,7 +43,7 @@ describe('Utils:', () => {
         expect(Utils._isDate(new Date())).toStrictEqual(true)
         expect(typeof Utils._isDate).toStrictEqual('function')
         expect(Utils._isDate(() => {})).toStrictEqual(false)
-        expect(Utils._isDate('')).toStrictEqual(true)
+        expect(Utils._isDate('')).toStrictEqual(false)
     })
     test('check _isString', () => {
         expect(Utils._isString('')).toStrictEqual(true)

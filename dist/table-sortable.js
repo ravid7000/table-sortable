@@ -1,7 +1,7 @@
 /*
  * table-sortable
- * version: 2.0.1
- * release date: 17/2/2020
+ * version: 2.0.2
+ * release date: 13/12/2020
  * (c) Ravi Dhiman <ravi.dhiman@ravid.dev> https://ravid.dev
  * For the full copyright and license information, please view the LICENSE
 */

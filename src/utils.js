@@ -1,6 +1,6 @@
 export const _isArray = arr => Array.isArray(arr)
 
-export const _isNumber = num => typeof num === 'number'
+export const _isNumber = num => typeof num === 'number' && !isNaN(num)
 
 export const _isObject = obj => typeof obj === 'object'
 
@@ -9,13 +9,12 @@ export const _isFunction = fun => typeof fun === 'function'
 export const _isString = str => typeof str === 'string'
 
 export const _isDate = str => {
-    if (Object.prototype.toString.call(str) === '[object Date]') {
-        if (_isNumber(str.getTime())) {
-            return true
-        }
-    } else if (_isString(str)) {
+    if (Object.prototype.toString.call(str) === '[object Date]' && !isNaN(str)) {
+        return true
+    }
+    if (_isString(str)) {
         const d = new Date(str)
-        if (_isNumber(d.getTime())) {
+        if (_isNumber(d.getDate())) {
             return true
         }
     }

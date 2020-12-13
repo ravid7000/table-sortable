@@ -132,7 +132,7 @@ describe('Table Sortable Pagination:', () => {
             data,
             columns,
         })
-        table.setPage(table._pagination.totalPages)
+        table.setPage(table._pagination.totalPages - 1)
         const buttons = $(rootElm)
             .find('.gs-pagination')
             .find('button')
