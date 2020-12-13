@@ -318,13 +318,11 @@ class TableSortable {
 
         // create header
         Utils._forEach(colKeys, (part, i) => {
-            let c
+            let c = columns[part]
             if (Utils._isFunction(formatHeader)) {
                 c = formatHeader(columns[part], part, i)
-            } else {
-                c = `<span>${columns[part]}</span>`
             }
-            c = this._addColSorting(c, part)
+            c = this._addColSorting($('<span></span>').html(c), part)
             const tbd = this.engine.createElement('th', {
                 html: c,
             })

@@ -443,10 +443,10 @@ var table = $('#table-sortable').tableSortable({
     ...
     formatHeader: function(columnValue, columnKey, index) {
         if (columnKey === 'formCode') {
-            return $('span').addClass('bold').text(columnValue);
+            return $('<span></span>').addClass('bold').text(columnValue);
         }
         if (columnKey === 'fullName') {
-            return $('span').addClass('uppercase').text(columnValue);
+            return $('<span></span>').addClass('uppercase').text(columnValue);
         }
         // Finally return columnValue;
         return columnValue;
