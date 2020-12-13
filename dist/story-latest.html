@@ -416,10 +416,10 @@ var table = $('#table-sortable').tableSortable({
     ...
     formatCell: function(row, key) {
         if (key === 'formCode') {
-            return $('span').addClass('bold').text(row[key]);
+            return $('<span></span>').addClass('font-weight-bold').text(row[key]);
         }
         if (key === 'fullName') {
-            return $('span').addClass('uppercase').text(row[key]);
+            return $('<span></span>').addClass('text-uppercase').text(row[key]);
         }
         // Finally return cell for rest of columns;
         return row[key];
