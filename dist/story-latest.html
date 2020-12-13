@@ -416,10 +416,10 @@ var table = $('#table-sortable').tableSortable({
     ...
     formatCell: function(row, key) {
         if (key === 'formCode') {
-            return $('<span></span>').addClass('font-weight-bold').text(row[key]);
+            return $('&gt;span&lt;&gt;/span&lt;').addClass('font-weight-bold').text(row[key]);
         }
         if (key === 'fullName') {
-            return $('<span></span>').addClass('text-uppercase').text(row[key]);
+            return $('&gt;span&lt;&gt;/span&lt;').addClass('text-uppercase').text(row[key]);
         }
         // Finally return cell for rest of columns;
         return row[key];
@@ -443,10 +443,10 @@ var table = $('#table-sortable').tableSortable({
     ...
     formatHeader: function(columnValue, columnKey, index) {
         if (columnKey === 'formCode') {
-            return $('<span></span>').addClass('bold').text(columnValue);
+            return $('&gt;span&lt;&gt;/span&lt;').addClass('bold').text(columnValue);
         }
         if (columnKey === 'fullName') {
-            return $('<span></span>').addClass('uppercase').text(columnValue);
+            return $('&gt;span&lt;&gt;/span&lt;').addClass('uppercase').text(columnValue);
         }
         // Finally return columnValue;
         return columnValue;
