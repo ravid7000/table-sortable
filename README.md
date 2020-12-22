@@ -1,3 +1,4 @@
+
 # Table Sortable
 A jquery plugin to sort and paginate data in table form. [View full documentation](https://table-sortable.now.sh/story-latest.html) [View demo](https://table-sortable.now.sh/)
 
@@ -22,6 +23,9 @@ var options = {
 };
 var table = $('#table-sortable').tableSortable(options);
 ```
+
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/ravid7000/table-sortable)
+
 
 ### Licence
 
