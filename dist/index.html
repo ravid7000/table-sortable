@@ -50,8 +50,8 @@
     <script src="./table-sortable.js"></script>
     <script>
         var table = $('#root').tableSortable({
-            data,
-            columns,
+            data: data,
+            columns: columns,
             searchField: '#searchField',
             responsive: {
                 1100: {
@@ -63,16 +63,16 @@
             },
             rowsPerPage: 5,
             pagination: true,
-            tableWillMount: () => {
+            tableWillMount: function() {
                 console.log('table will mount')
             },
-            tableDidMount: () => {
+            tableDidMount: function() {
                 console.log('table did mount')
             },
-            tableWillUpdate: () => console.log('table will update'),
-            tableDidUpdate: () => console.log('table did update'),
-            tableWillUnmount: () => console.log('table will unmount'),
-            tableDidUnmount: () => console.log('table did unmount'),
+            tableWillUpdate: function() {console.log('table will update')},
+            tableDidUpdate: function() {console.log('table did update')},
+            tableWillUnmount: function() {console.log('table will unmount')},
+            tableDidUnmount: function() {console.log('table did unmount')},
             onPaginationChange: function(nextPage, setPage) {
                 setPage(nextPage);
             }
