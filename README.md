@@ -26,6 +26,12 @@ var table = $('#table-sortable').tableSortable(options);
 
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/ravid7000/table-sortable)
 
+<h3>Support</h3>
+<p>
+  <a href="https://www.buymeacoffee.com/raviddev">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="50" width="210" alt="raviddev" /></a>
+</p><br>
+
 
 ### Licence
 
