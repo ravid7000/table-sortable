@@ -76,7 +76,7 @@ class DataSet {
         )
         const head = this.top(1)[0]
         this._formatError(
-            head[column],
+            typeof head[column] !== 'undefined',
             'sort',
             'Column name "%s" does not exist in collection',
             column
