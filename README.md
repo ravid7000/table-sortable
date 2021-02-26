@@ -4,6 +4,9 @@ A jquery plugin to sort and paginate data in table form. [View full documentatio
 
 For version 1, See `v1` branch of this repo.
 
+## WIP (warning)
+Use `master` branch for stable version
+
 ### Dependencies
 Table Sortable has only one dependency [jquery](https://jquery.com/)
 
