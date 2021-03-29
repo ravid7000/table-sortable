@@ -13,7 +13,7 @@
     "lint": "eslint src/**/*.{ts,tsx}"
   },
   "keywords": [],
-  "author": "Kirill Shatskiy <kshatskiy.freelance@gmail.com>",
+  "author": "Ravi Dhiman <ravid7000@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "eslint": "^6.8.0",
@@ -31,6 +31,8 @@
     "@typescript-eslint/eslint-plugin": "^2.24.0",
     "@typescript-eslint/parser": "^2.24.0",
     "eslint-plugin-react": "^7.19.0",
+    "immutable": "^4.0.0-rc.12",
+    "native-url": "^0.3.4",
     "preact": "^10.3.4",
     "preact-compat": "^3.17.0",
     "preact-habitat": "^3.1.0",

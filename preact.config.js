@@ -13,6 +13,7 @@ export default {
    **/
   webpack(config, env, helpers, options) {
       delete config.entry.polyfills;
+      delete config.resolve.alias['url'];
       config.output.filename = "[name].js";
 
       config.plugins = config.plugins.filter(plugin => !(plugin instanceof MiniCssExtractPlugin));
