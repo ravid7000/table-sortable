@@ -1,0 +1,40 @@
+{
+  "name": "table-sortable",
+  "version": "0.1.0",
+  "description": "",
+  "main": "dist/index.js",
+  "umd:main": "dist/index.umd.js",
+  "module": "dist/index.m.js",
+  "source": "components/hello-world/index.js",
+  "scripts": {
+    "test": "NODE_ENV=test jest",
+    "build": "preact build --no-prerender --clean --template src/index.ejs --sw false",
+    "dev": "preact watch --template src/index.ejs --sw false",
+    "lint": "eslint src/**/*.{ts,tsx}"
+  },
+  "keywords": [],
+  "author": "Kirill Shatskiy <kshatskiy.freelance@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^25.1.0",
+    "node-sass": "^4.13.1",
+    "preact-cli": "^3.0.0-next.19",
+    "preact-render-to-string": "^4.1.0",
+    "sass-loader": "^6.0.6",
+    "ts-jest": "^25.2.1",
+    "ts-loader": "^6.2.1"
+  },
+  "dependencies": {
+    "@types/jest": "^25.1.4",
+    "@typescript-eslint/eslint-plugin": "^2.24.0",
+    "@typescript-eslint/parser": "^2.24.0",
+    "eslint-plugin-react": "^7.19.0",
+    "preact": "^10.3.4",
+    "preact-compat": "^3.17.0",
+    "preact-habitat": "^3.1.0",
+    "preact-router": "^2.5.7",
+    "typescript": "^3.8.3"
+  }
+}
