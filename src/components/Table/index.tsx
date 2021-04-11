@@ -1,40 +1,30 @@
 import { h, FunctionalComponent } from "preact";
 import OptionType from '../../types/options';
-import "./styles.scss";
+
+// components
+import Cell from '../Cell';
 
 interface TableProps {
-    options?: OptionType;
+  options?: Partial<OptionType>;
 }
 
-const Table: FunctionalComponent<TableProps> = () => {
-    return (
-        <table className="ts-table-root">
-            <thead>
-                <tr>
-                    <th>Col 1</th>
-                    <th>Col 2</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>column 1 data</td>
-                    <td>column 2 data</td>
-                </tr>
-                <tr>
-                    <td>column 3 data</td>
-                    <td>column 4 data</td>
-                </tr>
-                <tr>
-                    <td>column 3 data</td>
-                    <td>column 4 data</td>
-                </tr>
-                <tr>
-                    <td>column 3 data</td>
-                    <td>column 4 data</td>
-                </tr>
-            </tbody>
-        </table>
-    );
+const Table: FunctionalComponent<TableProps> = ({ options }) => {
+  return (
+    <div className="ts-table">
+      <div className="ts-table-head">
+        <div className="ts-table-row">
+          <div className="ts-table-header">Col 1</div>
+          <div className="ts-table-header">Col 2</div>
+        </div>
+      </div>
+      <div className="ts-table-body">
+        <div className="ts-table-row">
+          <Cell>Cell 1</Cell>
+          <Cell>Cell 1</Cell>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default Table;

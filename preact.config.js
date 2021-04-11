@@ -14,6 +14,12 @@ export default {
   webpack(config, env, helpers, options) {
       delete config.entry.polyfills;
       delete config.resolve.alias['url'];
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        react: 'preact/compat',
+        'react-dom/test-utils': 'preact/test-utils',
+        'react-dom': 'preact/compat',
+      }
       config.output.filename = "[name].js";
 
       config.plugins = config.plugins.filter(plugin => !(plugin instanceof MiniCssExtractPlugin));

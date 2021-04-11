@@ -1,0 +1,12 @@
+.ts-table * {
+  box-sizing: border-box;
+}
+
+.ts-table {
+  position: relative;
+  box-sizing: border-box;
+}
+
+.ts-table-row {
+  display: flex;
+}
