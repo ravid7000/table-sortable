@@ -74,13 +74,13 @@ class DataSet {
             '"%s" is invalid sort direction. Use "dataset.sortDirection.ASC" or "dataset.sortDirection.DESC".',
             direction
         )
-        const head = this.top(1)[0]
+        /*const head = this.top(1)[0]
         this._formatError(
             head[column],
             'sort',
             'Column name "%s" does not exist in collection',
             column
-        )
+        )*/
 
         if (this.sortDirection.ASC === direction) {
             this.dataset.sort(function(object, other) {

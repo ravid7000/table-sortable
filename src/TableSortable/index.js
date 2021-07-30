@@ -45,10 +45,7 @@ class TableSortable {
     _tbody = null
     _isMounted = false
     _isUpdating = false
-    _sorting = {
-        currentCol: '',
-        dir: '',
-    }
+    _sorting = []
     _pagination = {
         elm: null,
         currentPage: 0,
@@ -224,24 +221,40 @@ class TableSortable {
     }
 
     sortData(column) {
-        let { dir, currentCol } = this._sorting
-        if (column !== currentCol) {
-            dir = ''
+        let sorting = []
+        if (Utils._isArray(this._sorting)) {
+            let newCol = true
+            Utils._forEach(this._sorting, part => {
+                if (part.currentCol === column) {
+                    newCol = false
+                }
+            })
+            if (newCol) {
+                let dir = ''
+                let currentCol = column
+                this._sorting.push({ currentCol, dir })
+            }
+            Utils._forEach(this._sorting, part => {
+                if (part.currentCol === column) {
+                    if (!part.dir) {
+                        part.dir = this._dataset.sortDirection.ASC
+                    } else if (part.dir === this._dataset.sortDirection.ASC) {
+                        part.dir = this._dataset.sortDirection.DESC
+                    } else if (part.dir === this._dataset.sortDirection.DESC) {
+                        //dir = this._dataset.sortDirection.ASC
+                        part.dir = ''
+                    }
+                }
+                let dir = part.dir
+                let currentCol = part.currentCol
+                if (dir) {
+                    sorting.push({ currentCol, dir })
+                    this._dataset.sort(currentCol, dir)
+                }
+            })
+            this._sorting = sorting
+            this.updateCellHeader()
         }
-        if (!dir) {
-            dir = this._dataset.sortDirection.ASC
-        } else if (dir === this._dataset.sortDirection.ASC) {
-            dir = this._dataset.sortDirection.DESC
-        } else if (dir === this._dataset.sortDirection.DESC) {
-            dir = this._dataset.sortDirection.ASC
-        }
-        currentCol = column
-        this._sorting = {
-            dir,
-            currentCol,
-        }
-        this._dataset.sort(currentCol, dir)
-        this.updateCellHeader()
     }
 
     /**
@@ -259,8 +272,12 @@ class TableSortable {
             col = $(col)
             col.attr('role', 'button')
             col.addClass('gs-button')
-            if (key === this._sorting.currentCol && this._sorting.dir) {
-                col.append(this.options.sortingIcons[this._sorting.dir])
+            if (Utils._isArray(this._sorting)) {
+                Utils._forEach(this._sorting, part => {
+                    if (key === part.currentCol && part.dir) {
+                        col.append(this.options.sortingIcons[part.dir])
+                    }
+                })
             }
             col.click(function(e) {
                 self.sortData(key)
@@ -273,8 +290,12 @@ class TableSortable {
                     col = $(col)
                     col.attr('role', 'button')
                     col.addClass('gs-button')
-                    if (key === this._sorting.currentCol && this._sorting.dir) {
-                        col.append(this.options.sortingIcons[this._sorting.dir])
+                    if (Utils._isArray(this._sorting)) {
+                        Utils._forEach(this._sorting, part => {
+                            if (key === part.currentCol && part.dir) {
+                                col.append(this.options.sortingIcons[part.dir])
+                            }
+                        })
                     }
                     col.click(function(e) {
                         self.sortData(key)
@@ -785,10 +806,7 @@ class TableSortable {
             }
             this._isMounted = false
             this._isUpdating = false
-            this._sorting = {
-                currentCol: '',
-                dir: '',
-            }
+            this._sorting = []
             this._cachedViewPort = -1
             this._cachedOption = null
             this.emitLifeCycles('tableDidUnmount')
