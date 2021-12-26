@@ -1,10 +1,8 @@
 import { writable } from 'svelte/store'
 
-import type { Collection, PartialOptions } from '../options'
+import type { PartialOptions } from '../../options'
 
-export const collection = writable<Collection>([])
-
-export const options = writable<PartialOptions>({
+export const Options = writable<PartialOptions>({
   columns: [],
   sorting: true,
   sortingIcons: {

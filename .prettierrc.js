@@ -1,0 +1,21 @@
+module.exports = {
+  trailingComma: 'es5',
+  tabWidth: 2,
+  semi: false,
+  singleQuote: true,
+  svelteSortOrder: 'options-styles-scripts-markup',
+  svelteStrictMode: true,
+  svelteAllowShorthand: true,
+  svelteIndentScriptAndStyle: true,
+  importOrder: [
+    '^svelte/(.*)$',
+    '^svelte/store(.*)$',
+    '^Components/(.*)$',
+    '^Store/(.*)$',
+    '^options$',
+    '^enums$',
+    '^[./]',
+  ],
+  importOrderSeparation: true,
+  importOrderSortSpecifiers: true,
+}

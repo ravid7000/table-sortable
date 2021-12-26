@@ -12,8 +12,8 @@ export const columns = [
     headerClassName: 'id-header',
     type: ColumnTypes.number,
     headerRender: (header) => {
-      return `##${header}`;
-    }
+      return `##${header}`
+    },
   },
   {
     header: 'Name',
@@ -50,16 +50,16 @@ export const columns = [
     dataKey: 'address.zipcode',
     type: ColumnTypes.text,
     render: (td) => {
-      console.log(td);
-      return td;
-    }
+      console.log(td)
+      return td
+    },
   },
-];
+]
 
 export function fetchTestData() {
   return fetch('https://jsonplaceholder.typicode.com/users')
-    .then(res => res.json())
-    .then(data => {
+    .then((res) => res.json())
+    .then((data) => {
       return {
         data,
         columns,

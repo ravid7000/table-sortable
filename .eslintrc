@@ -1,27 +1,19 @@
 {
-    "root": true,
-    "env": {
-        "browser": true,
-        "node": true
-    },
-    "extends": [
-        "plugin:prettier/recommended",
-        "prettier/react",
-        "react-app"
-    ],
-    "plugins": [
-        "@typescript-eslint/tslint"
-    ],
-    "rules": {
-        "indent": ["error", 4],
-        "quotes": ["error", "single"],
-        "no-console": "off"
-    },
-    "settings": {
-        "import/resolver": {
-            "alias": [
-                ["src", "./src"]
-            ]
-        }
+  "root": true,
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "extends": ["plugin:prettier/recommended", "prettier/react", "react-app"],
+  "plugins": ["@typescript-eslint/tslint"],
+  "rules": {
+    "indent": ["error", 4],
+    "quotes": ["error", "single"],
+    "no-console": "off"
+  },
+  "settings": {
+    "import/resolver": {
+      "alias": [["src", "./src"]]
     }
+  }
 }

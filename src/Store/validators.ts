@@ -1,8 +1,9 @@
-import isEmpty from "lodash.isempty";
-import isObject from "lodash.isobject";
-import isArray from "lodash.isarray";
-import type Column from "../column";
-import type { Collection, PartialOptions } from "../options";
+import isArray from 'lodash.isarray'
+import isEmpty from 'lodash.isempty'
+import isObject from 'lodash.isobject'
+
+import type Column from '../column'
+import type { Collection, PartialOptions } from '../options'
 
 /**
  * Validate the collection should be 1D array.
@@ -10,11 +11,13 @@ import type { Collection, PartialOptions } from "../options";
  * @returns boolean
  */
 export function isCollectionValid(data: Collection | undefined | null) {
-  return data && !isEmpty(data) && isArray(data);
+  return data && !isEmpty(data) && isArray(data)
 }
 
 export function isColumnsValid(columns: Column[] | undefined | null) {
-  return columns && !isEmpty(columns) && isArray(columns) && isObject(columns[0]);
+  return (
+    columns && !isEmpty(columns) && isArray(columns) && isObject(columns[0])
+  )
 }
 
 /**
@@ -24,7 +27,11 @@ export function isColumnsValid(columns: Column[] | undefined | null) {
  */
 export function isOptionsValid(options: PartialOptions | undefined | null) {
   if (options === undefined || options === null || isEmpty(options)) {
-    return false;
+    return false
   }
-  return isObject(options) && isColumnsValid(options.columns) && isCollectionValid(options.data);
+  return (
+    isObject(options) &&
+    isColumnsValid(options.columns) &&
+    isCollectionValid(options.data)
+  )
 }

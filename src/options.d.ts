@@ -1,6 +1,6 @@
-import Column from './column';
+import Column from './column'
 
-export type Collection = Record<string, unknown>[];
+export type Collection = Record<string, unknown>[]
 
 export enum SORT_ORDER {
   DEFAULT = 'DEFAULT',
@@ -9,30 +9,30 @@ export enum SORT_ORDER {
 }
 
 type Options = {
-  columns: Column[];
-  data: Collection;
+  columns: Column[]
+  data: Collection
 
   // SORTING
-  sorting: boolean | number[];
+  sorting: boolean | number[]
   sortingIcons: {
-    asc: string;
-    desc: string;
-  };
+    asc: string
+    desc: string
+  }
 
   // PAGINATION
-  rowsPerPage: number;
-  totalPages: number;
-  pagination: boolean;
-  nextText: string;
-  prevText: string;
+  rowsPerPage: number
+  totalPages: number
+  pagination: boolean
+  nextText: string
+  prevText: string
 
   // STYLES
-  className: string;
-  rowClassName: string;
+  className: string
+  rowClassName: string
 
-  searchField: string | null;
+  searchField: string | null
 }
 
-export type PartialOptions = Partial<Options>;
+export type PartialOptions = Partial<Options>
 
-export default Options;
+export default Options

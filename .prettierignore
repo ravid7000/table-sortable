@@ -1,3 +1,5 @@
-**/*.json
-public/**/*.*
-**/*.min.*
+node_modules
+build
+public
+.vscode
+.idea

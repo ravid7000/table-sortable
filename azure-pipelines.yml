@@ -4,19 +4,19 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 trigger:
-- master
+  - master
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '12.x'
-  displayName: 'Install Node.js'
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '12.x'
+    displayName: 'Install Node.js'
 
-- script: |
-    npm install -g webpack webpack-cli --save-dev
-    npm install
-    npm run test -- --no-watch
-  displayName: 'npm install, npm test, run webpack'
+  - script: |
+      npm install -g webpack webpack-cli --save-dev
+      npm install
+      npm run test -- --no-watch
+    displayName: 'npm install, npm test, run webpack'
