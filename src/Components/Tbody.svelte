@@ -17,35 +17,31 @@
 
 <script lang="ts">
   import get from 'lodash.get'
-  import { createEventDispatcher } from 'svelte'
 
-  import Cell from 'Components/Cell.svelte'
-  import Pagination from 'Components/Pagination.svelte'
-  import { columnAlign } from 'Components/utils'
+  import Cell from './Cell.svelte'
+  import Pagination from './Pagination.svelte'
 
-  import type {
-    PaginationButtonsType,
-    PaginationType,
-  } from 'Store/Pagination/store'
+  import {
+    DerivedPaginationStore,
+  } from '../Store/Pagination/store'
+  import { setCurrentPage } from '../Store/Pagination/actions'
 
-  import type { PartialOptions } from 'options'
+  import type { PartialOptions } from '../options'
+
+  import { columnAlign } from './utils'
 
   export let options: PartialOptions
-  export let pagination: PaginationType
-  export let paginationButtons: PaginationButtonsType
 
   let td = {}
 
-  let dispatch = createEventDispatcher()
-
   const handlePaginationChange = (event: CustomEvent<{ page: number }>) => {
-    dispatch('paginationChange', { page: event.detail.page })
+    setCurrentPage(event.detail.page);
   }
 </script>
 
-{#if pagination && pagination.data.length > 0}
+{#if $DerivedPaginationStore && $DerivedPaginationStore.data.length > 0}
   <tbody>
-    {#each pagination.data as cell, cellIdx}
+    {#each $DerivedPaginationStore.data as cell, cellIdx}
       <tr class="{options.rowClassName}">
         {#each options.columns as column, idx}
           <td
@@ -66,9 +62,9 @@
   </tbody>
   <tfoot>
     <Pagination
-      pages="{paginationButtons}"
-      currentPage="{pagination.currentPage + 1}"
-      totalPages="{pagination.totalPages}"
+      pages="{$DerivedPaginationStore.pages}"
+      currentPage="{$DerivedPaginationStore.currentPage + 1}"
+      totalPages="{$DerivedPaginationStore.totalPages}"
       on:paginationChange="{handlePaginationChange}"
     />
   </tfoot>

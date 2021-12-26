@@ -27,40 +27,31 @@
 </style>
 
 <script lang="ts">
-  import type Column from 'column'
-
   import { is_function } from 'svelte/internal'
 
-  import Tbody from 'Components/Tbody.svelte'
-  import { columnAlign, isColumnSortable } from 'Components/utils'
+  import Tbody from './Tbody.svelte'
 
-  import type {
-    PaginationButtonsType,
-    PaginationType,
-  } from 'Store/Pagination/store'
+  import type { PartialOptions } from '../options'
 
-  import type { PartialOptions } from 'options'
+  import { SORT_ORDER } from '../enums'
 
-  import { SORT_ORDER } from 'enums'
+  import type Column from '../column'
+  import { columnAlign, isColumnSortable } from './utils'
+
+  import { SortableStore } from '../Store/Collection/store';
+  import { sortCollection } from '../Store/Collection/actions';
 
   export let options: PartialOptions
-  export let pagination: PaginationType
-  export let paginationButtons: PaginationButtonsType
 
-  let sorted = {}
-
-  const handleSortingClick = (idx: number, column: Column) => {
-    if (sorted[idx]) {
-      if (sorted[idx] === SORT_ORDER.ASC) {
-        sorted[idx] = SORT_ORDER.DESC
-      } else if (sorted[idx] === SORT_ORDER.DESC) {
-        sorted[idx] = null
-      }
-    } else {
-      sorted = {
-        [idx]: SORT_ORDER.ASC,
-      }
+  const handleSortingClick = (key: string, column: Column) => {
+    let nextOrder = SORT_ORDER.ASC
+    if ($SortableStore[key] === SORT_ORDER.ASC) {
+      nextOrder = SORT_ORDER.DESC
+    } else if ($SortableStore[key] === SORT_ORDER.DESC) {
+      nextOrder = null
     }
+
+    sortCollection(key, nextOrder)
 
     if (is_function(column.onHeaderClick)) {
       column.onHeaderClick(column)
@@ -84,18 +75,18 @@
                 )}"
                 class:right="{columnAlign(column.type) === 'right'}"
                 class:center="{columnAlign(column.type) === 'center'}"
-                on:click="{() => handleSortingClick(idx, column)}"
+                on:click="{() => handleSortingClick(column.dataKey, column)}"
               >
                 {#if is_function(column.headerRender)}
                   {column.headerRender(column.header)}
                 {:else}
                   {column.header}
                 {/if}
-                {#if sorted[idx]}
+                {#if $SortableStore[column.dataKey]}
                   <span class="sorting-icon">
-                    {#if sorted[idx] === SORT_ORDER.ASC}
+                    {#if $SortableStore[column.dataKey] === SORT_ORDER.ASC}
                       {options.sortingIcons.asc}
-                    {:else if sorted[idx] === SORT_ORDER.DESC}
+                    {:else if $SortableStore[column.dataKey] === SORT_ORDER.DESC}
                       {options.sortingIcons.desc}
                     {/if}
                   </span>
@@ -107,8 +98,6 @@
       </thead>
       <Tbody
         options="{options}"
-        pagination="{pagination}"
-        paginationButtons="{paginationButtons}"
       />
     {/if}
   </table>

@@ -1,10 +1,10 @@
 import type { PartialOptions } from '../../options'
-import { Options } from './store'
+import { DefaultOptions, Options } from './store'
 
 export const setOptions = (options: PartialOptions) => {
-  Options.set(options)
+  Options.set({ ...DefaultOptions, ...options })
 }
 
 export const updateOptions = (options: PartialOptions) => {
-  Options.update((options) => ({ ...options, ...options }))
+  Options.update((opt) => ({ ...opt, ...options }))
 }

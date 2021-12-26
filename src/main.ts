@@ -1,14 +1,16 @@
-import App from 'App.svelte'
-// utils
 import cloneDeep from 'lodash.clonedeep'
 
-import { setCollection } from 'Store/Collection/actions'
-import { setOptions } from 'Store/Options/actions'
-import { setPagination } from 'Store/Pagination/actions'
-import { isOptionsValid } from 'Store/validators'
+import App from './App.svelte'
 
-import type { Collection, PartialOptions } from 'options'
+import { setCollection } from './Store/Collection/actions'
+import { setOptions } from './Store/Options/actions'
+import {
+  isCollectionValid,
+  isDataLoading,
+  isOptionsValid,
+} from './Store/validators'
 
+import type { Collection, PartialOptions } from './options'
 import { fetchTestData } from './testData/config'
 
 class TableSortable {
@@ -18,20 +20,16 @@ class TableSortable {
     private parentNode: HTMLElement,
     private options: PartialOptions
   ) {
-    if (!isOptionsValid(this.options)) {
-      throw Error(
-        'TableSortable options are not valid. Please see the docs for valid options.'
-      )
-    }
+    if (!isDataLoading(this.options)) {
+      if (!isOptionsValid(this.options)) {
+        throw Error(
+          'TableSortable options are not valid. Please see the docs for valid options.'
+        )
+      }
 
-    setCollection(cloneDeep(options.data))
-    setOptions({ ...options, data: [] })
-    setPagination({
-      data: this.options.data,
-      options: this.options,
-      currentPage: 0,
-      paginationWindow: 5,
-    })
+      setCollection(cloneDeep(options.data))
+      setOptions({ ...options, data: [] })
+    }
     this.createApp()
   }
 
@@ -47,6 +45,9 @@ class TableSortable {
    * @param update
    */
   setData(data: Collection, update?: boolean) {
+    if (!isCollectionValid(data)) {
+      throw new TypeError('TableSortable data is not valid.')
+    }
     this.app.setData(data, update)
   }
 
@@ -56,7 +57,19 @@ class TableSortable {
    * @param update
    */
   setOptions(options: PartialOptions, update?: boolean) {
+    if (!isOptionsValid(options)) {
+      throw Error(
+        'TableSortable options are not valid. Please see the docs for valid options.'
+      )
+    }
     this.app.setOptions(options, update)
+  }
+
+  /**
+   * Set current page
+   */
+  setPage(page: number) {
+    this.app.setPage(page)
   }
 
   /**
@@ -74,7 +87,9 @@ class TableSortable {
   }
 }
 
-const table = new TableSortable(document.body, {})
+const table = new TableSortable(document.body, {
+  loading: true,
+})
 
 function createTable(el: HTMLElement, config: PartialOptions) {
   table.setData(config.data)
@@ -85,7 +100,6 @@ fetchTestData().then(({ data, columns }) => {
   createTable(document.body, {
     data,
     columns,
-    rowsPerPage: 5,
   })
 })
 

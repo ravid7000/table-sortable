@@ -31,6 +31,9 @@ type Options = {
   rowClassName: string
 
   searchField: string | null
+
+  // LOADING: when data is loading
+  loading?: boolean
 }
 
 export type PartialOptions = Partial<Options>

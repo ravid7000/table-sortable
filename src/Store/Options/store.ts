@@ -2,7 +2,7 @@ import { writable } from 'svelte/store'
 
 import type { PartialOptions } from '../../options'
 
-export const Options = writable<PartialOptions>({
+export const DefaultOptions = {
   columns: [],
   sorting: true,
   sortingIcons: {
@@ -17,4 +17,6 @@ export const Options = writable<PartialOptions>({
   className: '',
   rowClassName: '',
   searchField: null,
-})
+}
+
+export const Options = writable<PartialOptions>(DefaultOptions)

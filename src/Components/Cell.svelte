@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type Column from 'column'
-
   import { is_function } from 'svelte/internal'
+
+  import type Column from '../column'
 
   export let render: Column['render']
   export let td: HTMLTableCellElement
@@ -15,4 +15,6 @@
   }
 </script>
 
+{#if cell}
 <span>{cell}</span>
+{/if}

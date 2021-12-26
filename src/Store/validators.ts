@@ -2,8 +2,9 @@ import isArray from 'lodash.isarray'
 import isEmpty from 'lodash.isempty'
 import isObject from 'lodash.isobject'
 
-import type Column from '../column'
 import type { Collection, PartialOptions } from '../options'
+
+import type Column from '../column'
 
 /**
  * Validate the collection should be 1D array.
@@ -11,7 +12,7 @@ import type { Collection, PartialOptions } from '../options'
  * @returns boolean
  */
 export function isCollectionValid(data: Collection | undefined | null) {
-  return data && !isEmpty(data) && isArray(data)
+  return data && isArray(data)
 }
 
 export function isColumnsValid(columns: Column[] | undefined | null) {
@@ -34,4 +35,13 @@ export function isOptionsValid(options: PartialOptions | undefined | null) {
     isColumnsValid(options.columns) &&
     isCollectionValid(options.data)
   )
+}
+
+/**
+ * Check if loading option is passed to config.
+ * @param options Options
+ * @returns
+ */
+export function isDataLoading(options: PartialOptions | undefined | null) {
+  return isObject(options) && options.loading
 }

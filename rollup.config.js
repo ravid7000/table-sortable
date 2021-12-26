@@ -4,11 +4,20 @@ import resolve from '@rollup/plugin-node-resolve'
 import typescript from '@rollup/plugin-typescript'
 import css from 'rollup-plugin-css-only'
 import livereload from 'rollup-plugin-livereload'
-import svelte from 'rollup-plugin-svelte'
 import { terser } from 'rollup-plugin-terser'
 import sveltePreprocess from 'svelte-preprocess'
 
+import svelte from 'rollup-plugin-svelte'
+
 const production = !process.env.ROLLUP_WATCH
+
+const aliases = alias({
+  resolve: ['.svelte', '.js', '.ts'], //optional, by default this will just look for .js files or folders
+  entries: [
+    { find: 'Components', replacement: './Components' },
+    { find: 'Store', replacement: './Store' },
+  ],
+})
 
 function serve() {
   let server
@@ -36,11 +45,6 @@ function serve() {
 }
 
 export default {
-  resolve: ['.svelte', '.js'], //optional, by default this will just look for .js files or folders
-  entries: [
-    { find: 'Components', replacement: 'src/Components' },
-    { find: 'Store', replacement: 'src/Store' },
-  ],
   input: 'src/main.ts',
   output: {
     sourcemap: true,
@@ -49,6 +53,7 @@ export default {
     file: 'public/build/bundle.js',
   },
   plugins: [
+    aliases,
     svelte({
       preprocess: sveltePreprocess({ sourceMap: !production }),
       compilerOptions: {

@@ -7,61 +7,51 @@ enum ColumnTypes {
 
 export const columns = [
   {
-    header: 'ID',
-    dataKey: 'id',
-    headerClassName: 'id-header',
-    type: ColumnTypes.number,
-    headerRender: (header) => {
-      return `##${header}`
-    },
-  },
-  {
-    header: 'Name',
-    dataKey: 'name',
-    type: ColumnTypes.text,
-  },
-  {
-    header: 'Username',
-    dataKey: 'username',
-    type: ColumnTypes.text,
-  },
-  {
-    header: 'Website',
-    dataKey: 'website',
-    type: ColumnTypes.text,
-  },
-  {
-    header: 'Phone',
-    dataKey: 'phone',
-    type: ColumnTypes.text,
-  },
-  {
-    header: 'Company Name',
-    dataKey: 'company.name',
-    type: ColumnTypes.text,
-  },
-  {
     header: 'City',
-    dataKey: 'address.city',
+    dataKey: 'city',
     type: ColumnTypes.text,
   },
   {
-    header: 'Zip-Code',
-    dataKey: 'address.zipcode',
+    header: 'Country',
+    dataKey: 'country',
     type: ColumnTypes.text,
-    render: (td) => {
-      console.log(td)
-      return td
-    },
+  },
+  {
+    header: 'Year',
+    dataKey: 'year',
+    type: ColumnTypes.number,
+  },
+  {
+    header: 'Value',
+    dataKey: 'value',
+    type: ColumnTypes.number,
+  },
+  {
+    header: 'Sex',
+    dataKey: 'sex',
+    type: ColumnTypes.text,
+  },
+  {
+    header: 'Reliability',
+    dataKey: 'reliabilty',
+    type: ColumnTypes.text,
   },
 ]
 
 export function fetchTestData() {
-  return fetch('https://jsonplaceholder.typicode.com/users')
+  return fetch(
+    'https://countriesnow.space/api/v0.1/countries/population/cities'
+  )
     .then((res) => res.json())
+    .then((res) => res.data)
     .then((data) => {
       return {
-        data,
+        data: data.map((item) => {
+          return {
+            ...item,
+            ...item.populationCounts[0],
+          }
+        }),
         columns,
       }
     })

@@ -1,8 +1,8 @@
 import isArray from 'lodash.isarray'
 
-import type { Collection, PartialOptions } from 'options'
+import type { Collection, PartialOptions } from '../options'
 
-import { ColumnAlignment } from 'enums'
+import { ColumnAlignment } from '../enums'
 
 export const isColumnSortable = (
   columnIdx: number,

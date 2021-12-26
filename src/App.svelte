@@ -1,20 +1,19 @@
 <script lang="ts">
-  import Table from 'Components/Table.svelte'
+  import Table from './Components/Table.svelte'
 
   import {
     getCollection,
     setCollection,
     updateCollection,
-  } from 'Store/Collection/actions'
-  import * as OptionActions from 'Store/Options/actions'
-  import { Options } from 'Store/Options/store'
+  } from './Store/Collection/actions'
+  import * as OptionActions from './Store/Options/actions'
+  import { Options } from './Store/Options/store'
   import {
     getPaginationData,
-    setPaginationData,
-  } from 'Store/Pagination/actions'
-  import { Pagination, PaginationButtons } from 'Store/Pagination/store'
+    setCurrentPage,
+  } from './Store/Pagination/actions'
 
-  import type { Collection, PartialOptions } from 'options'
+  import type { Collection, PartialOptions } from './options'
 
   /**
    * Set runtime data to Table
@@ -27,9 +26,8 @@
     } else {
       setCollection(data)
     }
-    if (!getPaginationData().length) {
-      setPaginationData(data)
-    }
+    // Whenever data changes, reset pagination
+    setCurrentPage(0)
   }
 
   /**
@@ -43,6 +41,8 @@
     } else {
       OptionActions.setOptions({ ...options, data: [] })
     }
+    // Whenever options changes, reset pagination
+    setCurrentPage(0)
   }
 
   /**
@@ -58,12 +58,23 @@
   export function getCurrentPageData() {
     return getPaginationData()
   }
+
+  /**
+   * Set current page
+   */
+  export function setPage(page: number) {
+    if (typeof page === 'number') {
+      setCurrentPage(page);
+    }
+  }
 </script>
 
 {#if $Options}
-  <Table
-    options="{$Options}"
-    pagination="{$Pagination}"
-    paginationButtons="{$PaginationButtons}"
-  />
+  {#if $Options.loading}
+  Loading...
+  {:else}
+    <Table
+      options="{$Options}"
+    />
+  {/if}
 {/if}
