@@ -1,4 +1,12 @@
 <style>
+  button {
+    display: inline-block;
+    text-align: center;
+    cursor: pointer;
+    background-color: #fff;
+    border: 1px solid #ccc;
+  }
+
   .active {
     background-color: #4CAF50;
   }
@@ -25,18 +33,21 @@
 </script>
 
 <div class="pagination">
-  <button on:click="{() => handleBtnClick(currentPage - 1)}">{prevText}</button>
+  <button disabled="{currentPage === 1}" on:click="{() => handleBtnClick(currentPage - 1)}" title="Go to previous page">{prevText}</button>
   {#if totalPages > 10}
-    <button on:click="{() => handleBtnClick(1)}">{`<<`}</button>
+    <button disabled="{currentPage === 1}" on:click="{() => handleBtnClick(1)}" title="Go to first page">{`<<`}</button>
   {/if}
   {#each pages as page}
     <button
       class:active="{currentPage === page}"
-      on:click="{() => handleBtnClick(page)}">{page}</button
+      title="{`Go to page ${page}`}"
+      on:click="{() => handleBtnClick(page)}"
     >
+      {page}
+    </button>
   {/each}
   {#if totalPages > 10}
-    <button on:click="{() => handleBtnClick(totalPages)}">{`>>`}</button>
+    <button disabled="{currentPage === totalPages}" on:click="{() => handleBtnClick(totalPages)}" title="Go to last page">{`>>`}</button>
   {/if}
-  <button on:click="{() => handleBtnClick(currentPage + 1)}">{nextText}</button>
+  <button disabled="{currentPage === totalPages}" on:click="{() => handleBtnClick(currentPage + 1)}" title="Go to next page">{nextText}</button>
 </div>

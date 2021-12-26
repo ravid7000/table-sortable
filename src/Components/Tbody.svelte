@@ -61,11 +61,15 @@
     {/each}
   </tbody>
   <tfoot>
-    <Pagination
-      pages="{$DerivedPaginationStore.pages}"
-      currentPage="{$DerivedPaginationStore.currentPage + 1}"
-      totalPages="{$DerivedPaginationStore.totalPages}"
-      on:paginationChange="{handlePaginationChange}"
-    />
+    <tr>
+      <td colspan="{options.columns.length}">
+        <Pagination
+          pages="{$DerivedPaginationStore.pages}"
+          currentPage="{$DerivedPaginationStore.currentPage + 1}"
+          totalPages="{$DerivedPaginationStore.totalPages}"
+          on:paginationChange="{handlePaginationChange}"
+        />
+      </td>
+    </tr>
   </tfoot>
 {/if}
