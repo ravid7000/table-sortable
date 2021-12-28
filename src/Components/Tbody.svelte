@@ -34,6 +34,8 @@
             cell="{get(cell, column.dataKey)}"
             row="{cell}"
             render="{column.render}"
+            onSelect="{column.onSelect}"
+            onCellClick="{column.onCellClick}"
           />
         {/each}
       </Tr>

@@ -2,6 +2,12 @@ import { ColumnTypes } from './enums'
 
 type DataCallback<D = unknown, R = unknown> = (data: D, row: R) => void
 
+type OnSelectCallback<D = unknown, R = unknown> = (
+  data: D,
+  row: R,
+  isSelected: boolean
+) => boolean | void
+
 type DOM = unknown
 
 type Responsive = {
@@ -30,8 +36,8 @@ type Column = Partial<{
   // CALLBACKS
   onHeaderClick: (column: Column) => void
   onCellClick: DataCallback
-  onSelect: DataCallback
-  onSelectAll: DataCallback
+  onSelect: OnSelectCallback
+  onSelectAll: OnSelectCallback
 }>
 
 export default Column

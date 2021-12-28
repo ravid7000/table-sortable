@@ -12,6 +12,7 @@
   .ts-table--head-cell {
     display: table-cell;
     font-weight: bold;
+    vertical-align: middle;
   }
 
   /* thead th {
