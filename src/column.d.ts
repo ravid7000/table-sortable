@@ -21,7 +21,7 @@ type Column = Partial<{
   dateFormat: string
   dataKey: string
   className: string
-  render: (td: HTMLTableCellElement, item: unknown, row: unknown) => td
+  render: (td: HTMLElement, item: unknown, row: unknown) => td
 
   // OPTIONS
   responsive: Responsive

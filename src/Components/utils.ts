@@ -4,6 +4,8 @@ import type { Collection, PartialOptions } from '../options'
 
 import { ColumnAlignment } from '../enums'
 
+import type { ClassNamesType } from '../types'
+
 export const isColumnSortable = (
   columnIdx: number,
   options: PartialOptions,
@@ -87,4 +89,28 @@ export const createPagination = ({
     }
   }
   return pages
+}
+
+export const removeDuplicateFromArray = (arr: any[]) => {
+  return arr.filter((item, index) => arr.indexOf(item) === index)
+}
+
+export const classNames = (...args: ClassNamesType[]) => {
+  let classes = []
+  args.forEach((arg) => {
+    if (arg) {
+      if (typeof arg === 'string') {
+        classes.push(arg)
+      } else if (Array.isArray(arg)) {
+        classes.push(...arg)
+      } else if (typeof arg === 'object') {
+        Object.keys(arg).forEach((key) => {
+          if (arg[key]) {
+            classes.push(key)
+          }
+        })
+      }
+    }
+  })
+  return removeDuplicateFromArray(classes).join(' ')
 }

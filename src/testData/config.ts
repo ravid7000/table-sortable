@@ -7,6 +7,11 @@ enum ColumnTypes {
 
 export const columns = [
   {
+    header: '',
+    dataKey: 'checked',
+    type: ColumnTypes.checkbox,
+  },
+  {
     header: 'City',
     dataKey: 'city',
     type: ColumnTypes.text,

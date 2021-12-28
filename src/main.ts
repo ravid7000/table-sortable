@@ -100,6 +100,7 @@ fetchTestData().then(({ data, columns }) => {
   createTable(document.body, {
     data,
     columns,
+    rowsPerPage: 5,
   })
 })
 
