@@ -69,9 +69,12 @@
         {#if !column.hide}
           <div
             class="{classNames('ts-table--head-cell', column.headerClassName)}"
-            class:clickable="{column.type === ColumnTypes.checkbox
-              ? false
-              : isColumnSortable(idx, options, column.sorting)}"
+            class:clickable="{isColumnSortable(
+              idx,
+              options,
+              column.sorting,
+              column.type
+            )}"
             class:right="{columnAlign(column.type) === 'right'}"
             class:center="{columnAlign(column.type) === 'center'}"
             class:cell-checkbox="{column.type === ColumnTypes.checkbox}"
