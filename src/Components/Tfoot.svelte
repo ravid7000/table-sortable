@@ -12,6 +12,10 @@
   import { setCurrentPage } from '../Store/Pagination/actions'
   import { DerivedPaginationStore } from '../Store/Pagination/store'
 
+  import type { PartialOptions } from '../options'
+
+  export let options: PartialOptions
+
   const handlePaginationChange = (event: CustomEvent<{ page: number }>) => {
     setCurrentPage(event.detail.page)
   }
@@ -22,6 +26,8 @@
     <Pagination
       pagination="{$DerivedPaginationStore}"
       totalRows="{$TotalCollection}"
+      prevText="{options.prevText}"
+      nextText="{options.nextText}"
       on:paginationChange="{handlePaginationChange}"
     />
   </div>

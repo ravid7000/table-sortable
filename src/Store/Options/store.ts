@@ -17,6 +17,12 @@ export const DefaultOptions = {
   className: '',
   rowClassName: '',
   searchField: null,
+  colors: {
+    primary: '#0070f3',
+    background: '#f5f5f5',
+    border: '#e1e1e1',
+    text: '#333',
+  },
 }
 
 export const Options = writable<PartialOptions>(DefaultOptions)

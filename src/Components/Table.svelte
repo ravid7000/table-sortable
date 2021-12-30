@@ -37,5 +37,5 @@
     <Thead options="{options}" />
     <Tbody options="{options}" />
   </div>
-  <Tfoot />
+  <Tfoot options="{options}" />
 {/if}

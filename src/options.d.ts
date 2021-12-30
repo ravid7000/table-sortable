@@ -32,6 +32,13 @@ type Options = {
 
   searchField: string | null
 
+  colors: {
+    primary: string
+    background: string
+    border: string
+    text: string
+  }
+
   // LOADING: when data is loading
   loading?: boolean
 }
