@@ -12,7 +12,8 @@
     padding: 0.375rem 0.75rem;
     font-size: 1rem;
     line-height: 1.5;
-    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+      border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     margin: 0;
     background-color: rgb(239, 239, 239);
   }
@@ -23,7 +24,7 @@
   }
 
   .active {
-    background-color: #4CAF50;
+    background-color: #4caf50;
   }
 
   .pagination {
@@ -41,44 +42,63 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte/internal'
 
-  import type { PaginationButtonsType } from '../Store/Pagination/store'
+  import type { PaginationType } from '../Store/Pagination/store'
 
-  export let currentPage: number
-  export let totalPages: number
+  export let totalRows: number
   export let nextText: string = 'Next'
   export let prevText: string = 'Prev'
-  export let pages: PaginationButtonsType
+  export let pagination: PaginationType
 
   const dispatch = createEventDispatcher()
 
   const handleBtnClick = (page: number) => {
     dispatch('paginationChange', {
-      page: Math.min(totalPages, Math.max(0, page)),
+      page: Math.min(pagination.totalPages, Math.max(0, page)),
     })
   }
 </script>
 
 <div class="pagination">
   <div>
-    Showing 
+    Showing {Math.min(pagination.endIndex, pagination.startIndex + 1)} to {Math.min(
+      totalRows,
+      pagination.endIndex
+    )}
+    of {totalRows} entries
   </div>
   <div class="button-group">
-    <button disabled="{currentPage === 0}" on:click="{() => handleBtnClick(currentPage - 1)}" title="Go to previous page">{prevText}</button>
-    {#if totalPages > 10}
-      <button disabled="{currentPage === 0}" on:click="{() => handleBtnClick(0)}" title="Go to first page">{`<<`}</button>
-    {/if}
-    {#each pages as page}
+    <button
+      disabled="{pagination.currentPage === 0}"
+      on:click="{() => handleBtnClick(pagination.currentPage - 1)}"
+      title="Go to previous page">{prevText}</button
+    >
+    {#if pagination.totalPages > 10}
       <button
-        class:active="{currentPage === page - 1}"
+        disabled="{pagination.currentPage === 0}"
+        on:click="{() => handleBtnClick(0)}"
+        title="Go to first page">{`<<`}</button
+      >
+    {/if}
+    {#each pagination.pages as page}
+      <button
+        class:active="{pagination.currentPage === page - 1}"
         title="{`Go to page ${page}`}"
         on:click="{() => handleBtnClick(page - 1)}"
       >
         {page}
       </button>
     {/each}
-    {#if totalPages > 10}
-      <button disabled="{currentPage === totalPages - 1}" on:click="{() => handleBtnClick(totalPages - 1)}" title="Go to last page">{`>>`}</button>
+    {#if pagination.totalPages > 10}
+      <button
+        disabled="{pagination.currentPage === pagination.totalPages - 1}"
+        on:click="{() => handleBtnClick(pagination.totalPages - 1)}"
+        title="Go to last page">{`>>`}</button
+      >
     {/if}
-    <button disabled="{currentPage === totalPages - 1}" on:click="{() => handleBtnClick(currentPage + 1)}" title="Go to next page">{nextText}</button>
+    <button
+      disabled="{pagination.currentPage === pagination.totalPages - 1}"
+      on:click="{() => handleBtnClick(pagination.currentPage + 1)}"
+      title="Go to next page">{nextText}</button
+    >
   </div>
 </div>

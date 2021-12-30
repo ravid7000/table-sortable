@@ -3,25 +3,8 @@
     display: table;
     width: 100%;
     max-width: 100%;
+    table-layout: fixed;
   }
-
-  .ts-table--head {
-    display: table-header-group;
-  }
-
-  .ts-table--head-cell {
-    display: table-cell;
-    font-weight: bold;
-    vertical-align: middle;
-  }
-
-  /* thead th {
-    border-bottom: 2px solid #dee2e6;
-    border-top: 1px solid #dee2e6;
-    vertical-align: bottom;
-    text-align: left;
-    padding: 0.75rem;
-  } */
 
   .clickable {
     cursor: pointer;

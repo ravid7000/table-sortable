@@ -1,10 +1,4 @@
 <style>
-  .ts-table {
-    display: table;
-    width: 100%;
-    max-width: 100%;
-  }
-
   .ts-table--head {
     display: table-header-group;
   }
@@ -12,6 +6,11 @@
   .ts-table--head-cell {
     display: table-cell;
     font-weight: bold;
+    padding: 0.75rem;
+  }
+
+  .cell-checkbox {
+    width: 1.5rem;
   }
 
   .clickable {
@@ -38,7 +37,7 @@
 
   import type { PartialOptions } from '../options'
 
-  import { SORT_ORDER } from '../enums'
+  import { ColumnTypes, SORT_ORDER } from '../enums'
 
   import type Column from '../column'
   import { classNames, columnAlign, isColumnSortable } from './utils'
@@ -46,17 +45,19 @@
   export let options: PartialOptions
 
   const handleSortingClick = (key: string, column: Column) => {
-    let nextOrder = SORT_ORDER.ASC
-    if ($SortableStore[key] === SORT_ORDER.ASC) {
-      nextOrder = SORT_ORDER.DESC
-    } else if ($SortableStore[key] === SORT_ORDER.DESC) {
-      nextOrder = null
-    }
+    if (column.type !== ColumnTypes.checkbox) {
+      let nextOrder = SORT_ORDER.ASC
+      if ($SortableStore[key] === SORT_ORDER.ASC) {
+        nextOrder = SORT_ORDER.DESC
+      } else if ($SortableStore[key] === SORT_ORDER.DESC) {
+        nextOrder = null
+      }
 
-    sortCollection(key, nextOrder)
+      sortCollection(key, nextOrder)
 
-    if (is_function(column.onHeaderClick)) {
-      column.onHeaderClick(column)
+      if (is_function(column.onHeaderClick)) {
+        column.onHeaderClick(column)
+      }
     }
   }
 </script>
@@ -68,9 +69,12 @@
         {#if !column.hide}
           <div
             class="{classNames('ts-table--head-cell', column.headerClassName)}"
-            class:clickable="{isColumnSortable(idx, options, column.sorting)}"
+            class:clickable="{column.type === ColumnTypes.checkbox
+              ? false
+              : isColumnSortable(idx, options, column.sorting)}"
             class:right="{columnAlign(column.type) === 'right'}"
             class:center="{columnAlign(column.type) === 'center'}"
+            class:cell-checkbox="{column.type === ColumnTypes.checkbox}"
             on:click="{() => handleSortingClick(column.dataKey, column)}"
           >
             {#if is_function(column.headerRender)}

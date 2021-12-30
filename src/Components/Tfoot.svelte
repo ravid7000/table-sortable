@@ -1,12 +1,14 @@
 <style>
   .ts-table--foot {
     width: 100%;
+    padding: 0.75rem;
   }
 </style>
 
 <script lang="ts">
   import Pagination from './Pagination.svelte'
 
+  import { TotalCollection } from '../Store/Collection/store'
   import { setCurrentPage } from '../Store/Pagination/actions'
   import { DerivedPaginationStore } from '../Store/Pagination/store'
 
@@ -18,9 +20,8 @@
 {#if $DerivedPaginationStore && $DerivedPaginationStore.data.length > 0}
   <div class="ts-table--foot">
     <Pagination
-      pages="{$DerivedPaginationStore.pages}"
-      currentPage="{$DerivedPaginationStore.currentPage}"
-      totalPages="{$DerivedPaginationStore.totalPages}"
+      pagination="{$DerivedPaginationStore}"
+      totalRows="{$TotalCollection}"
       on:paginationChange="{handlePaginationChange}"
     />
   </div>

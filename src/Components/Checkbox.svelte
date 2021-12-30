@@ -7,6 +7,10 @@
     visibility: hidden;
   }
 
+  label {
+    display: inline-block;
+  }
+
   .checkbox {
     display: inline-block;
     vertical-align: middle;
@@ -14,6 +18,7 @@
     height: 14px;
     position: relative;
     border: 2px solid #000;
+    cursor: pointer;
   }
 
   .checkbox::before,
@@ -22,7 +27,7 @@
     position: absolute;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.1s ease-in-out;
     background: #000;
     height: 2px;
   }
@@ -53,7 +58,7 @@
   export let id: string = ''
 </script>
 
-<label for="{id}">
+<label for="{id}" on:click>
   <input checked="{checked}" on:click type="checkbox" id="{id}" />
   <span class="checkbox" class:checked></span>
 </label>

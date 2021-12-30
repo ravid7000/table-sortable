@@ -2,6 +2,7 @@
   .ts-table--cell {
     display: table-cell;
     vertical-align: middle;
+    padding: 0.75rem;
   }
 
   .right {
@@ -18,6 +19,8 @@
 
   import Checkbox from './Checkbox.svelte'
 
+  import { toggleCheckbox } from '../Store/Collection/actions'
+
   import { ColumnTypes } from '../enums'
 
   import type Column from '../column'
@@ -31,18 +34,33 @@
   export let row: unknown
   export let type: keyof typeof ColumnTypes
   export let className: ClassNamesType = ''
+  export let currentPage: number
+  export let rowsPerPage: number
+  export let dataIndex: number
+  export let dataKey: string
 
   let tableCellElement: HTMLElement
 
   const handleCellClick = () => {
     if (is_function(onCellClick)) {
-      onCellClick(cell, row)
+      const rowIndex = dataIndex + (currentPage - 1) * rowsPerPage
+      onCellClick(cell, row, rowIndex)
     }
   }
 
   const handleCheckboxChange = (checked: boolean) => {
+    let handled = false
+    const rowIndex = dataIndex + currentPage * rowsPerPage
     if (is_function(onSelect)) {
-      onSelect(cell, row, checked)
+      handled = onSelect(cell, row, checked, rowIndex)
+    }
+
+    if (!handled) {
+      toggleCheckbox({
+        checked,
+        index: rowIndex,
+        dataKey,
+      })
     }
   }
 

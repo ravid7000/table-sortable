@@ -14,6 +14,8 @@ export type PaginationType = {
   paginationWindow: number
   data: Collection
   pages: number[]
+  startIndex: number
+  endIndex: number
 }
 
 export type PaginationButtonsType = number[]
@@ -25,8 +27,8 @@ export const DerivedPaginationStore: Readable<PaginationType> = derived(
   ([options, collection, currentPage]) => {
     const rowsPerPage = options.rowsPerPage || 10
     const totalPages =
-      options.totalPages || Math.floor(collection.length / rowsPerPage)
-    const paginationWindow = Math.min(Math.floor(totalPages / 2), 5)
+      options.totalPages || Math.ceil(collection.length / rowsPerPage)
+    const paginationWindow = Math.min(Math.ceil(totalPages / 2), 5)
     const min = currentPage * rowsPerPage
     const max = min + rowsPerPage
     const pages = createPages({ currentPage, totalPages, paginationWindow })
@@ -36,6 +38,8 @@ export const DerivedPaginationStore: Readable<PaginationType> = derived(
       rowsPerPage,
       totalPages,
       paginationWindow,
+      startIndex: min,
+      endIndex: max,
       data: cloneDeep(collection.slice(min, max)),
       pages,
     }

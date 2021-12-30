@@ -1,12 +1,17 @@
 import { ColumnTypes } from './enums'
 
-type DataCallback<D = unknown, R = unknown> = (data: D, row: R) => void
+type DataCallback<D = unknown, R = unknown> = (
+  data: D,
+  row: R,
+  rowIndex: number
+) => void
 
 type OnSelectCallback<D = unknown, R = unknown> = (
   data: D,
   row: R,
-  isSelected: boolean
-) => boolean | void
+  isSelected: boolean,
+  rowIndex: number
+) => boolean
 
 type DOM = unknown
 

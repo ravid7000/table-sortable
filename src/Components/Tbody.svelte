@@ -2,13 +2,6 @@
   .ts-table--body {
     display: table-row-group;
   }
-
-  /* tbody tr td {
-    border-bottom: 2px solid #dee2e6;
-    border-top: 1px solid #dee2e6;
-    vertical-align: bottom;
-    padding: 0.75rem;
-  } */
 </style>
 
 <script lang="ts">
@@ -26,10 +19,14 @@
 
 {#if $DerivedPaginationStore && $DerivedPaginationStore.data.length > 0}
   <div class="ts-table--body">
-    {#each $DerivedPaginationStore.data as cell}
+    {#each $DerivedPaginationStore.data as cell, index}
       <Tr className="{options.rowClassName}">
         {#each options.columns as column}
           <Cell
+            rowsPerPage="{$DerivedPaginationStore.rowsPerPage}"
+            currentPage="{$DerivedPaginationStore.currentPage}"
+            dataIndex="{index}"
+            dataKey="{column.dataKey}"
             type="{column.type}"
             cell="{get(cell, column.dataKey)}"
             row="{cell}"

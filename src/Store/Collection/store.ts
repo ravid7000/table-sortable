@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store'
+import { derived, writable } from 'svelte/store'
 
 import type { SORT_ORDER } from '../../enums'
 import type { Collection } from '../../options'
@@ -13,3 +13,8 @@ export const CollectionStore = writable<Collection>([])
 export const DontTouchCollectionStore = writable<Collection>([])
 
 export const SortableStore = writable<SortableStoreType>({})
+
+export const TotalCollection = derived(
+  CollectionStore,
+  ($collection) => $collection.length
+)

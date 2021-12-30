@@ -36,8 +36,27 @@ export const sortCollection = (key: string, order: SORT_ORDER) => {
 
   const data = cloneDeep(get(DontTouchCollectionStore))
 
-  console.log({ order, key })
-  console.log({ data })
-
   CollectionStore.set(sortData(data, key, order))
+}
+
+export const toggleCheckbox = ({
+  index,
+  dataKey = '@checked',
+  checked,
+}: {
+  index: number
+  dataKey: string
+  checked: boolean
+}) => {
+  const collection = get(DontTouchCollectionStore)
+
+  collection[index][dataKey] = checked
+
+  const collectionAll = get(CollectionStore)
+
+  collectionAll[index][dataKey] = checked
+
+  // Keep both the collection's data in sync
+  DontTouchCollectionStore.set(collection.slice(0))
+  CollectionStore.set(collectionAll.slice(0))
 }
