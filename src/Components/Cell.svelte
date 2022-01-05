@@ -1,8 +1,9 @@
 <style>
   .ts-table--cell {
     display: table-cell;
-    vertical-align: middle;
-    padding: 0.75rem;
+    vertical-align: top;
+    padding: 0.95rem 0.75rem;
+    border-bottom: 1px solid var(--color-border);
   }
 
   .right {

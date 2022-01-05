@@ -15,7 +15,10 @@
     transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
       border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     margin: 0;
-    background-color: rgb(239, 239, 239);
+    background-color: var(--color-buttonBg);
+    box-sizing: border-box;
+    border-radius: 0;
+    color: inherit;
   }
 
   button:disabled {
@@ -24,18 +27,32 @@
   }
 
   .active {
-    background-color: #4caf50;
+    color: #fff;
+    background-color: var(--color-primary);
   }
 
   .pagination {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
   }
 
   .button-group {
     position: relative;
     display: inline-flex;
     vertical-align: middle;
+    box-sizing: border-box;
+  }
+
+  .button-group > button:first-child {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+  }
+
+  .button-group > button:last-child {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
   }
 </style>
 
@@ -76,7 +93,7 @@
       <button
         disabled="{pagination.currentPage === 0}"
         on:click="{() => handleBtnClick(0)}"
-        title="Go to first page">{`<<`}</button
+        title="Go to first page">&#8810;</button
       >
     {/if}
     {#each pagination.pages as page}
@@ -92,7 +109,7 @@
       <button
         disabled="{pagination.currentPage === pagination.totalPages - 1}"
         on:click="{() => handleBtnClick(pagination.totalPages - 1)}"
-        title="Go to last page">{`>>`}</button
+        title="Go to last page">&#8811;</button
       >
     {/if}
     <button

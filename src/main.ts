@@ -10,7 +10,7 @@ import {
   isOptionsValid,
 } from './Store/validators'
 
-import type { Collection, PartialOptions } from './options'
+import type { Collection, PartialOptions, THEME } from './options'
 import { fetchTestData } from './testData/config'
 
 class TableSortable {
@@ -87,7 +87,7 @@ class TableSortable {
   }
 }
 
-const table = new TableSortable(document.body, {
+const table = new TableSortable(document.getElementById('app'), {
   loading: true,
 })
 
@@ -97,10 +97,11 @@ function createTable(el: HTMLElement, config: PartialOptions) {
 }
 
 fetchTestData().then(({ data, columns }) => {
-  createTable(document.body, {
+  createTable(document.getElementById('app'), {
     data,
     columns,
-    rowsPerPage: 5,
+    rowsPerPage: 10,
+    theme: 'minimal',
   })
 })
 

@@ -8,6 +8,8 @@ export enum SORT_ORDER {
   DESC = 'DESC',
 }
 
+export type THEME = 'minimal' | 'bordered' | 'border-less'
+
 type Options = {
   columns: Column[]
   data: Collection
@@ -37,7 +39,15 @@ type Options = {
     background: string
     border: string
     text: string
+    buttonBg: string
+    header: string
+    headerBg: string
+    headerBorder: string
+    footer: string
+    footerBg: string
   }
+
+  theme: THEME
 
   // LOADING: when data is loading
   loading?: boolean

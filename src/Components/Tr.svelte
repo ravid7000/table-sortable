@@ -3,6 +3,7 @@
     display: table-row;
     vertical-align: inherit;
     border-color: inherit;
+    box-sizing: border-box;
   }
 </style>
 

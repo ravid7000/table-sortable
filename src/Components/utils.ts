@@ -1,7 +1,11 @@
 import isArray from 'lodash.isarray'
+import isEmpty from 'lodash.isempty'
+import isObject from 'lodash.isobject'
+import keys from 'lodash.keys'
 import memoize from 'lodash.memoize'
 
 import type { PartialOptions } from '../options'
+import type Options from '../options'
 
 import { ColumnAlignment, ColumnTypes } from '../enums'
 
@@ -37,7 +41,7 @@ export const removeDuplicateFromArray = (arr: any[]) => {
   return arr.filter((item, index) => arr.indexOf(item) === index)
 }
 
-export const classNames = memoize((...args: ClassNamesType[]) => {
+export const classNames = (...args: ClassNamesType[]) => {
   let classes = []
   args.forEach((arg) => {
     if (arg) {
@@ -55,4 +59,15 @@ export const classNames = memoize((...args: ClassNamesType[]) => {
     }
   })
   return removeDuplicateFromArray(classes).join(' ')
-})
+}
+
+export const setColorVarsForStyle = (
+  element: HTMLElement,
+  colors: Options['colors']
+) => {
+  if (element && isObject(colors) && !isEmpty(colors)) {
+    keys(colors).map((key) => {
+      element.style.setProperty(`--color-${key}`, colors[key])
+    })
+  }
+}

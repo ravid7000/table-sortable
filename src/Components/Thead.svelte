@@ -1,16 +1,22 @@
 <style>
   .ts-table--head {
     display: table-header-group;
+    box-sizing: border-box;
+    background-color: var(--color-headerBg);
+    color: var(--color-header);
   }
 
   .ts-table--head-cell {
     display: table-cell;
     font-weight: bold;
-    padding: 0.75rem;
+    padding: 0.9rem 0.75rem;
+    box-sizing: border-box;
+    border-top: 1px solid var(--color-headerBorder);
+    border-bottom: 2px solid var(--color-headerBorder);
   }
 
   .cell-checkbox {
-    width: 1.5rem;
+    width: 2.6rem;
   }
 
   .clickable {

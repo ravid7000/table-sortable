@@ -1,24 +1,14 @@
 <style>
-  input {
-    overflow: hidden;
-    width: 0;
-    height: 0;
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  label {
-    display: inline-block;
-  }
-
   .checkbox {
     display: inline-block;
-    vertical-align: middle;
-    width: 14px;
-    height: 14px;
+    vertical-align: top;
+    width: 18px;
+    height: 18px;
     position: relative;
-    border: 2px solid #000;
+    border: 2px solid var(--color-text);
     cursor: pointer;
+    box-sizing: border-box;
+    border-radius: 2px;
   }
 
   .checkbox::before,
@@ -27,8 +17,8 @@
     position: absolute;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.1s ease-in-out;
-    background: #000;
+    transition: all 0.2s ease-in-out;
+    background: var(--color-text);
     height: 2px;
   }
 
@@ -40,9 +30,9 @@
   }
 
   .checkbox::after {
-    width: 9px;
+    width: 11px;
     top: 6px;
-    left: 4px;
+    left: 3px;
     transform: rotate(-45deg);
   }
 
@@ -58,7 +48,4 @@
   export let id: string = ''
 </script>
 
-<label for="{id}" on:click>
-  <input checked="{checked}" on:click type="checkbox" id="{id}" />
-  <span class="checkbox" class:checked></span>
-</label>
+<span id="{id}" on:click class="checkbox" class:checked></span>

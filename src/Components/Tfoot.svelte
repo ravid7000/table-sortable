@@ -1,7 +1,10 @@
 <style>
   .ts-table--foot {
     width: 100%;
-    padding: 0.75rem;
+    box-sizing: border-box;
+    padding: 0.75rem 0;
+    background-color: var(--color-footerBg);
+    color: var(--color-footer);
   }
 </style>
 
