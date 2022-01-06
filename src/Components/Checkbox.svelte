@@ -1,4 +1,4 @@
-<style>
+<style lang="postcss">
   .checkbox {
     display: inline-block;
     vertical-align: top;

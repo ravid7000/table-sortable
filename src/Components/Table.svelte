@@ -1,4 +1,4 @@
-<style>
+<style lang="postcss">
   .ts-table-root {
     color: var(--color-text);
     background-color: var(--color-background);
@@ -31,19 +31,6 @@
 
   .border-less :global(.ts-table--head-cell) {
     border: 0;
-  }
-
-  .clickable {
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .right {
-    text-align: right;
-  }
-
-  .center {
-    text-align: center;
   }
 </style>
 

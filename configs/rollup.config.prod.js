@@ -2,6 +2,8 @@ import alias from '@rollup/plugin-alias'
 import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
 import typescript from '@rollup/plugin-typescript'
+import bundleSize from 'rollup-plugin-bundle-size'
+import copy from 'rollup-plugin-copy'
 import css from 'rollup-plugin-css-only'
 import { terser } from 'rollup-plugin-terser'
 import sveltePreprocess from 'svelte-preprocess'
@@ -37,7 +39,11 @@ const outputs = [
 const plugins = [
   aliases,
   svelte({
-    preprocess: sveltePreprocess(),
+    preprocess: sveltePreprocess({
+      postcss: {
+        plugins: [require('autoprefixer')],
+      },
+    }),
     compilerOptions: {
       dev: false,
     },
@@ -60,14 +66,39 @@ const plugins = [
 
   // If we're building for production (npm run build
   // instead of npm run dev), minify
-  terser(),
+  terser({
+    format: {
+      comments: false,
+    },
+  }),
+
+  bundleSize(),
 ]
 
-const config = outputs.map((output) => {
+const config = outputs.map((output, index) => {
   return {
     input,
     output,
-    plugins,
+    plugins:
+      index === outputs.length - 1
+        ? [
+            ...plugins,
+            copy({
+              targets: [
+                {
+                  src: [
+                    'src/table-sortable.d.ts',
+                    'src/types.ts',
+                    'src/options.d.ts',
+                    'src/column.d.ts',
+                    'src/enums.ts',
+                  ],
+                  dest: 'dist',
+                },
+              ],
+            }),
+          ]
+        : plugins,
   }
 })
 

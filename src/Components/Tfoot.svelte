@@ -1,4 +1,4 @@
-<style>
+<style lang="postcss">
   .ts-table--foot {
     width: 100%;
     box-sizing: border-box;

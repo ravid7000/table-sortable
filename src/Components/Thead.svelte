@@ -1,4 +1,4 @@
-<style>
+<style lang="postcss">
   .ts-table--head {
     display: table-header-group;
     box-sizing: border-box;

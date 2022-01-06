@@ -1,4 +1,4 @@
-<style>
+<style lang="postcss">
   .ts-table--cell {
     display: table-cell;
     vertical-align: top;

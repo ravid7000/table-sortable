@@ -12,9 +12,7 @@ import {
 
 import type { Collection, PartialOptions } from './options'
 
-interface ITableSortable {}
-
-class TableSortable implements ITableSortable {
+class TableSortable {
   private app!: App
 
   constructor(

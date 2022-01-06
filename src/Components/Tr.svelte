@@ -1,4 +1,4 @@
-<style>
+<style lang="postcss">
   .ts-table--row {
     display: table-row;
     vertical-align: inherit;

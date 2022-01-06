@@ -1,4 +1,3 @@
-import isArray from 'lodash.isarray'
 import isEmpty from 'lodash.isempty'
 import isObject from 'lodash.isobject'
 import keys from 'lodash.keys'
@@ -28,7 +27,8 @@ export const isColumnSortable = memoize(
 
     return (
       options.sorting === true ||
-      (isArray(options.sorting) && options.sorting.indexOf(columnIdx) > -1)
+      (Array.isArray(options.sorting) &&
+        options.sorting.indexOf(columnIdx) > -1)
     )
   }
 )
