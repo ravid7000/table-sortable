@@ -2,8 +2,10 @@
   "name": "svelte-app",
   "version": "1.0.0",
   "private": true,
+  "main": "./dist/table-sortable.cjs.js",
+  "module": "./dist/table-sortable.es.js",
   "scripts": {
-    "build": "rollup -c",
+    "build": "tsc -p && rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public --no-clear",
     "check": "svelte-check --tsconfig ./tsconfig.json",
