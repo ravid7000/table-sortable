@@ -1,4 +1,3 @@
-import isArray from 'lodash.isarray'
 import isEmpty from 'lodash.isempty'
 import isObject from 'lodash.isobject'
 
@@ -12,12 +11,15 @@ import type Column from '../column'
  * @returns boolean
  */
 export function isCollectionValid(data: Collection | undefined | null) {
-  return data && isArray(data)
+  return data && Array.isArray(data)
 }
 
 export function isColumnsValid(columns: Column[] | undefined | null) {
   return (
-    columns && !isEmpty(columns) && isArray(columns) && isObject(columns[0])
+    columns &&
+    !isEmpty(columns) &&
+    Array.isArray(columns) &&
+    isObject(columns[0])
   )
 }
 
