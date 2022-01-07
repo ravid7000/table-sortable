@@ -4,12 +4,13 @@
   "main": "./dist/table-sortable.cjs.js",
   "module": "./dist/table-sortable.es.js",
   "scripts": {
-    "build": "rollup -c",
+    "build": "node ./scripts/build.js",
     "dev": "rollup -c -w",
+    "dev:server": "node ./scripts/server.js",
     "start": "sirv public --no-clear",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "format": "prettier --write --plugin-search-dir=. ./",
-    "test:watch": "jest --watch",
+    "test:w": "jest --watch",
     "test": "jest"
   },
   "devDependencies": {

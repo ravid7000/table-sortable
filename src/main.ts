@@ -19,5 +19,3 @@ fetchTestData().then(({ data, columns }) => {
     theme: 'minimal',
   })
 })
-
-export default table

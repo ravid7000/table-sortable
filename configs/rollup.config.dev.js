@@ -43,12 +43,14 @@ function serve() {
 
 export default {
   input: 'src/main.ts',
-  output: {
-    sourcemap: true,
-    format: 'iife',
-    name: 'TableSortable',
-    file: 'public/build/bundle.js',
-  },
+  output: [
+    {
+      sourcemap: true,
+      format: 'iife',
+      name: 'TableSortable',
+      file: 'public/build/bundle.js',
+    },
+  ],
   plugins: [
     aliases,
     svelte({
