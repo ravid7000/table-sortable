@@ -1,4 +1,43 @@
+import cloneDeep from 'lodash.clonedeep'
 import memoize from 'lodash.memoize'
+
+import type { Collection } from '../../options'
+import type Options from '../../options'
+import type { PaginationType } from './types'
+
+export const createPaginationBasis = (
+  options: Partial<Options>,
+  data: Collection,
+  currentPage: number
+): PaginationType => {
+  const rowsPerPage = options.rowsPerPage || 10
+  const props: PaginationType = {
+    rowsPerPage,
+    currentPage,
+    totalPages: options.totalPages || Math.ceil(data.length / rowsPerPage),
+    paginationWindow: 5,
+    data: [],
+    pages: [],
+    startIndex: 0,
+    endIndex: 0,
+  }
+
+  if (!options.pagination) {
+    return { ...props, data }
+  }
+
+  props.paginationWindow = Math.min(Math.ceil(props.totalPages / 2), 5)
+  props.startIndex = currentPage * rowsPerPage
+  props.endIndex = props.startIndex + rowsPerPage
+  props.pages = createPages({
+    currentPage,
+    totalPages: props.totalPages,
+    paginationWindow: props.paginationWindow,
+  })
+  props.data = cloneDeep(data.slice(props.startIndex, props.endIndex))
+
+  return props
+}
 
 export const createPages = memoize(
   ({

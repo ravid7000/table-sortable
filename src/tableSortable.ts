@@ -75,22 +75,30 @@ class TableSortable {
    * Get table data.
    */
   getData() {
-    this.app.getData()
+    return this.app.getData()
   }
 
   /**
    * Get data for current page
    */
   getCurrentPageData() {
-    this.app.getCurrentPageData()
+    return this.app.getCurrentPageData()
   }
 
   /**
    * Update rows per page
    * @param rowsPerPage
    */
-  setRowsPerPage(rowsPerPage: number) {
-    this.app.setRowsPerPage(rowsPerPage)
+  setRowsPerPage(rowsPerPage: number | string) {
+    this.app.setRowsPerPage(parseInt(rowsPerPage as string, 10))
+  }
+
+  /**
+   * Search data
+   * @param search
+   */
+  search(search: string) {
+    this.app.search(search)
   }
 }
 

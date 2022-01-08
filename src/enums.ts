@@ -17,3 +17,5 @@ export const ColumnAlignment = {
   [ColumnTypes.date]: 'right',
   [ColumnTypes.checkbox]: 'center',
 }
+
+export const UNIQUE_ID_KEY = '__ts_id'

@@ -22,7 +22,7 @@
 
   import { toggleCheckbox } from '../Store/Collection/actions'
 
-  import { ColumnTypes } from '../enums'
+  import { ColumnTypes, UNIQUE_ID_KEY } from '../enums'
 
   import type Column from '../column'
   import type { ClassNamesType } from '../types'
@@ -59,7 +59,7 @@
     if (!handled) {
       toggleCheckbox({
         checked,
-        index: rowIndex,
+        id: row[UNIQUE_ID_KEY],
         dataKey,
       })
     }

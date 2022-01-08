@@ -11,7 +11,6 @@
     display: table;
     width: 100%;
     max-width: 100%;
-    table-layout: fixed;
     box-sizing: border-box;
     border-collapse: collapse;
   }

@@ -1,7 +1,7 @@
 <style lang="postcss">
   .checkbox {
     display: inline-block;
-    vertical-align: top;
+    vertical-align: text-bottom;
     width: 18px;
     height: 18px;
     position: relative;

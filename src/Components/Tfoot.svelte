@@ -24,7 +24,7 @@
   }
 </script>
 
-{#if $DerivedPaginationStore && $DerivedPaginationStore.data.length > 0}
+{#if options.pagination && $DerivedPaginationStore}
   <div class="ts-table--foot">
     <Pagination
       pagination="{$DerivedPaginationStore}"

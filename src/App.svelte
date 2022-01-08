@@ -3,6 +3,7 @@
 
   import {
     getCollection,
+    searchCollection,
     setCollection,
     updateCollection,
   } from './Store/Collection/actions'
@@ -69,6 +70,10 @@
     if (typeof rowPerPage === 'number') {
       OptionActions.setRowsPerPage(rowPerPage)
     }
+  }
+
+  export function search(search: string) {
+    searchCollection(search)
   }
 </script>
 
