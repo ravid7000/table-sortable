@@ -8,10 +8,7 @@
   } from './Store/Collection/actions'
   import * as OptionActions from './Store/Options/actions'
   import { Options } from './Store/Options/store'
-  import {
-    getPaginationData,
-    setCurrentPage,
-  } from './Store/Pagination/actions'
+  import { getPaginationData, setCurrentPage } from './Store/Pagination/actions'
 
   import type { Collection, PartialOptions } from './options'
 
@@ -64,17 +61,21 @@
    */
   export function setPage(page: number) {
     if (typeof page === 'number') {
-      setCurrentPage(page);
+      setCurrentPage(page)
+    }
+  }
+
+  export function setRowsPerPage(rowPerPage: number) {
+    if (typeof rowPerPage === 'number') {
+      OptionActions.setRowsPerPage(rowPerPage)
     }
   }
 </script>
 
 {#if $Options}
   {#if $Options.loading}
-  Loading...
+    Loading...
   {:else}
-    <Table
-      options="{$Options}"
-    />
+    <Table options="{$Options}" />
   {/if}
 {/if}

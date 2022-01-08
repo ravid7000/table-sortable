@@ -84,6 +84,14 @@ class TableSortable {
   getCurrentPageData() {
     this.app.getCurrentPageData()
   }
+
+  /**
+   * Update rows per page
+   * @param rowsPerPage
+   */
+  setRowsPerPage(rowsPerPage: number) {
+    this.app.setRowsPerPage(rowsPerPage)
+  }
 }
 
 export default TableSortable

@@ -30,3 +30,10 @@ export const updateOptions = (options: PartialOptions) => {
     },
   }))
 }
+
+export const setRowsPerPage = (rowsPerPage: number) => {
+  Options.update((opt) => ({
+    ...opt,
+    rowsPerPage,
+  }))
+}
