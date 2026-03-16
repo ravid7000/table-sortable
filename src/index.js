@@ -1,5 +1,6 @@
 import $ from 'jquery'
 import TableSortable from './TableSortable'
+import DataSet from './DataSet'
 import { data, columns } from './data'
 
 function init() {
@@ -33,3 +34,6 @@ function init() {
 }
 
 init()
+
+export { DataSet }
+export default TableSortable
