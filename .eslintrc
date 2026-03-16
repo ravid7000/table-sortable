@@ -5,9 +5,7 @@
         "node": true
     },
     "extends": [
-        "plugin:prettier/recommended",
-        "prettier/react",
-        "react-app"
+        "plugin:prettier/recommended"
     ],
     "plugins": [
         "@typescript-eslint/tslint"

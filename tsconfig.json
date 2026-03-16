@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "build",
+    "outDir": "dist",
     "module": "esnext",
     "target": "es5",
     "lib": [
@@ -36,10 +36,8 @@
   },
   "exclude": [
     "node_modules/",
-    "build/",
     "scripts/",
     "acceptance-tests/",
-    "webpack/",
     "jest/",
     "src/setupTests.ts",
     "public/",
