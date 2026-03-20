@@ -1,3 +1,57 @@
+// ─── Variables ────────────────────────────────────────────────────────────────
+
+/// Z-index used when stickyHeader is enabled.
+$gs-sticky-header-z-index: 10 !default;
+
+/// Background colour for the sticky header row (prevents content bleeding
+/// through while scrolling).
+$gs-sticky-header-bg: #fff !default;
+
+/// Top offset for the sticky header (useful when a fixed navigation bar is
+/// present — override via your own stylesheet).
+$gs-sticky-header-top: 0 !default;
+
+// ─── Base styles ──────────────────────────────────────────────────────────────
+
 .gs-button {
     cursor: pointer;
+}
+
+// ─── Sticky header ────────────────────────────────────────────────────────────
+
+/// Applied to <thead> when the `stickyHeader` option is `true`.
+.gs-sticky-header {
+    position: sticky;
+    top: $gs-sticky-header-top;
+    z-index: $gs-sticky-header-z-index;
+    background-color: $gs-sticky-header-bg;
+
+    th {
+        // Ensure individual cells also carry the background so there are no
+        // gaps at the border between header cells.
+        background-color: inherit;
+    }
+}
+
+// ─── No-data empty state ──────────────────────────────────────────────────────
+
+.gs-no-data {
+    text-align: center;
+    padding: 1rem;
+    color: #6c757d; // muted text
+    font-style: italic;
+}
+
+// ─── Extra class hook (tableClassName) ───────────────────────────────────────
+// The `tableClassName` option lets callers pass arbitrary class strings, so
+// no hard-coded rules are needed here.  The modifier class `.gs-table--custom`
+// is reserved as a documented example that library consumers can target.
+
+.gs-table {
+    // Placeholder for any future base-table overrides.
+
+    &--custom {
+        // Override point: users may set `tableClassName: 'gs-table--custom'`
+        // and add their own rules targeting this modifier class.
+    }
 }

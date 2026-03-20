@@ -7,37 +7,11 @@ import $ from 'jquery'
 import DataSet from '../DataSet'
 import Pret from './renderEngine'
 import * as Utils from '../utils'
+import { normalizeOptions } from './options'
 import './index.scss'
 
 class TableSortable {
     _name = 'tableSortable'
-    _defOptions = {
-        element: '',
-        data: [],
-        columns: {},
-        sorting: true,
-        pagination: true,
-        paginationContainer: null,
-        rowsPerPage: 10,
-        formatCell: null,
-        formatHeader: null,
-        searchField: null,
-        responsive: {},
-        totalPages: 0,
-        sortingIcons: {
-            asc: '<span>▼</span>',
-            desc: '<span>▲</span>',
-        },
-        nextText: '<span>Next</span>',
-        prevText: '<span>Prev</span>',
-        tableWillMount: () => {},
-        tableDidMount: () => {},
-        tableWillUpdate: () => {},
-        tableDidUpdate: () => {},
-        tableWillUnmount: () => {},
-        tableDidUnmount: () => {},
-        onPaginationChange: null,
-    }
     _styles = null
     _dataset = null
     _table = null
@@ -59,8 +33,7 @@ class TableSortable {
     _cachedViewPort = -1
 
     constructor(options) {
-        this.options = $.extend(this._defOptions, options)
-        delete this._defOptions
+        this.options = normalizeOptions(options || {})
         this._rootElement = $(this.options.element)
         this.engine = Pret()
         this.optionDepreciation()
@@ -197,7 +170,11 @@ class TableSortable {
      * _createTable
      */
     _createTable() {
+        const { tableClassName } = this.options
         this._table = $('<table></table>').addClass('table gs-table')
+        if (tableClassName) {
+            this._table.addClass(tableClassName)
+        }
     }
 
     /**
@@ -308,20 +285,50 @@ class TableSortable {
         }
     }
 
+    /**
+     * _resolveNoDataTemplate
+     * @returns {string} HTML string for the empty-state row.
+     */
+    _resolveNoDataTemplate() {
+        const { noDataTemplate, columns } = this.options
+        const colSpan = Utils._keys(columns).length || 1
+        let content = '<em>No data available</em>'
+        if (Utils._isFunction(noDataTemplate)) {
+            content = noDataTemplate()
+        } else if (Utils._isString(noDataTemplate) && noDataTemplate) {
+            content = noDataTemplate
+        }
+        return `<tr><td colspan="${colSpan}" class="gs-no-data">${content}</td></tr>`
+    }
+
     _renderHeader(parentElm) {
         if (!parentElm) {
             parentElm = $('<thead class="gs-table-head"></thead>')
         }
-        const { columns, formatHeader } = this.options
+
+        // Apply sticky header if requested
+        const { stickyHeader } = this.options
+        if (stickyHeader) {
+            parentElm.addClass('gs-sticky-header')
+        } else {
+            parentElm.removeClass('gs-sticky-header')
+        }
+
+        const { columns, formatHeader, headerRenderers } = this.options
         const cols = []
         const colKeys = Utils._keys(columns) // TODO: add legacy support
 
         // create header
         Utils._forEach(colKeys, (part, i) => {
             let c = columns[part]
-            if (Utils._isFunction(formatHeader)) {
+
+            // headerRenderers take priority per-column
+            if (headerRenderers && Utils._isFunction(headerRenderers[part])) {
+                c = headerRenderers[part](columns[part])
+            } else if (Utils._isFunction(formatHeader)) {
                 c = formatHeader(columns[part], part, i)
             }
+
             c = this._addColSorting($('<span></span>').html(c), part)
             const tbd = this.engine.createElement('th', {
                 html: c,
@@ -338,7 +345,7 @@ class TableSortable {
             parentElm = $('<tbody class="gs-table-body"></tbody>')
         }
         const engine = this.engine
-        const { columns, formatCell } = this.options
+        const { columns, formatCell, cellRenderers, rowClassFn, onRowClick } = this.options
         const { from, to } = this.getCurrentPageIndex()
         let currentPageData = []
         if (to === undefined) {
@@ -349,13 +356,26 @@ class TableSortable {
         const rows = [] // list of rows in body
         const colKeys = Utils._keys(columns) // TODO: add legacy support
 
+        // Render empty-state when there is no data
+        if (!currentPageData || currentPageData.length === 0) {
+            const noDataHtml = this._resolveNoDataTemplate()
+            parentElm.empty().html(noDataHtml)
+            return parentElm
+        }
+
         // create body
+        const self = this
         Utils._forEach(currentPageData, function(part, i) {
             const cols = []
             Utils._forEach(colKeys, key => {
                 if (part[key] !== undefined) {
                     let tbd
-                    if (Utils._isFunction(formatCell)) {
+                    // cellRenderers take priority per-column
+                    if (cellRenderers && Utils._isFunction(cellRenderers[key])) {
+                        tbd = engine.createElement('td', {
+                            html: cellRenderers[key](part[key], part),
+                        })
+                    } else if (Utils._isFunction(formatCell)) {
                         tbd = engine.createElement('td', {
                             html: formatCell(part, key),
                         })
@@ -367,9 +387,53 @@ class TableSortable {
                     cols.push(tbd)
                 }
             })
-            rows.push(engine.createElement('tr', null, cols))
+
+            // Compute row class
+            let rowClass = null
+            if (Utils._isFunction(rowClassFn)) {
+                rowClass = rowClassFn(part, i)
+            }
+
+            const rowAttrs = rowClass ? { className: rowClass } : null
+            const row = engine.createElement('tr', rowAttrs, cols)
+
+            // Attach onRowClick after row is rendered into the DOM
+            rows.push({ vnode: row, rowData: part, rowIndex: i })
         })
-        return engine.render(rows, parentElm)
+
+        // Render rows into parentElm
+        const vnodes = rows.map(r => r.vnode)
+        engine.render(vnodes, parentElm)
+
+        // Bind onRowClick handlers
+        if (Utils._isFunction(onRowClick)) {
+            const trElements = parentElm.find('tr')
+            rows.forEach(function(r, idx) {
+                $(trElements[idx]).on('click', function(e) {
+                    onRowClick(r.rowData, r.rowIndex, e)
+                })
+            })
+        }
+
+        return parentElm
+    }
+
+    /**
+     * _renderColGroup
+     * Builds and inserts a <colgroup> into the table when columnWidths are set.
+     */
+    _renderColGroup() {
+        const { columns, columnWidths } = this.options
+        if (!columnWidths || Utils._keys(columnWidths).length === 0) {
+            return
+        }
+        const colKeys = Utils._keys(columns)
+        const colgroup = this.engine.renderColGroup(colKeys, columnWidths)
+        if (colgroup) {
+            // Remove any existing colgroup first
+            this._table.find('colgroup').remove()
+            this._table.prepend(colgroup)
+        }
     }
 
     /**
@@ -603,6 +667,7 @@ class TableSortable {
         this._validateColumns()
         const { thead, tbody } = this._createCells()
         this._generateTable(thead, tbody)
+        this._renderColGroup()
         this._renderTable()
         this.createPagination()
         this._bindSearchField()
@@ -636,6 +701,7 @@ class TableSortable {
         this._isUpdating = true
         this._renderHeader(this._thead)
         this._renderBody(this._tbody)
+        this._renderColGroup()
         this.createPagination()
         this._isUpdating = false
         this.emitLifeCycles('tableDidUpdate')
@@ -650,6 +716,7 @@ class TableSortable {
         this.emitLifeCycles('tableWillUpdate')
         this._renderHeader(this._thead)
         this._renderBody(this._tbody)
+        this._renderColGroup()
         this._isUpdating = false
         this.emitLifeCycles('tableDidUpdate')
     }
