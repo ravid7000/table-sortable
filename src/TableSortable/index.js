@@ -58,6 +58,10 @@ class TableSortable {
     _cachedOption = null
     _cachedViewPort = -1
 
+    // vNode caches – used by the diff/patch system to avoid full re-renders
+    _lastHeaderVNodes = null
+    _lastBodyVNodes = null
+
     constructor(options) {
         this.options = $.extend(this._defOptions, options)
         delete this._defOptions
@@ -308,68 +312,119 @@ class TableSortable {
         }
     }
 
-    _renderHeader(parentElm) {
-        if (!parentElm) {
-            parentElm = $('<thead class="gs-table-head"></thead>')
-        }
-        const { columns, formatHeader } = this.options
-        const cols = []
-        const colKeys = Utils._keys(columns) // TODO: add legacy support
+    // -----------------------------------------------------------------------
+    // vNode builders – produce the virtual representation that will be
+    // compared against the previous render to compute the minimal diff.
+    // -----------------------------------------------------------------------
 
-        // create header
+    /**
+     * _buildHeaderVNodes
+     * Builds the list of vNodes representing the single header <tr>.
+     * Returns an array with one element (the <tr> vNode).
+     */
+    _buildHeaderVNodes() {
+        const { columns, formatHeader } = this.options
+        const colKeys = Utils._keys(columns)
+        const cols = []
+
         Utils._forEach(colKeys, (part, i) => {
             let c = columns[part]
             if (Utils._isFunction(formatHeader)) {
                 c = formatHeader(columns[part], part, i)
             }
             c = this._addColSorting($('<span></span>').html(c), part)
-            const tbd = this.engine.createElement('th', {
-                html: c,
-            })
-            cols.push(tbd)
+            cols.push(this.engine.createVNode('th', { html: c }))
         })
 
-        const thr = this.engine.createElement('tr', null, cols)
-        return this.engine.render(thr, parentElm)
+        return [this.engine.createVNode('tr', null, cols)]
     }
 
-    _renderBody(parentElm) {
-        if (!parentElm) {
-            parentElm = $('<tbody class="gs-table-body"></tbody>')
-        }
+    /**
+     * _buildBodyVNodes
+     * Builds the list of vNodes representing each data <tr> row.
+     */
+    _buildBodyVNodes() {
         const engine = this.engine
         const { columns, formatCell } = this.options
         const { from, to } = this.getCurrentPageIndex()
+
         let currentPageData = []
         if (to === undefined) {
             currentPageData = this._dataset.top()
         } else {
             currentPageData = this._dataset.get(from, to)
         }
-        const rows = [] // list of rows in body
-        const colKeys = Utils._keys(columns) // TODO: add legacy support
 
-        // create body
-        Utils._forEach(currentPageData, function(part, i) {
+        const colKeys = Utils._keys(columns)
+        const rows = []
+
+        Utils._forEach(currentPageData, function(part) {
             const cols = []
             Utils._forEach(colKeys, key => {
                 if (part[key] !== undefined) {
                     let tbd
                     if (Utils._isFunction(formatCell)) {
-                        tbd = engine.createElement('td', {
-                            html: formatCell(part, key),
-                        })
+                        tbd = engine.createVNode('td', { html: formatCell(part, key) })
                     } else {
-                        tbd = engine.createElement('td', {
-                            html: part[key],
-                        })
+                        tbd = engine.createVNode('td', { html: part[key] })
                     }
                     cols.push(tbd)
                 }
             })
-            rows.push(engine.createElement('tr', null, cols))
+            rows.push(engine.createVNode('tr', null, cols))
         })
-        return engine.render(rows, parentElm)
+
+        return rows
+    }
+
+    // -----------------------------------------------------------------------
+    // Rendering helpers
+    // -----------------------------------------------------------------------
+
+    /**
+     * _renderHeader
+     * On first call (no parentElm) performs a full render into a new <thead>.
+     * On subsequent calls uses diff + patch for incremental updates.
+     */
+    _renderHeader(parentElm) {
+        const newVNodes = this._buildHeaderVNodes()
+
+        if (!parentElm) {
+            // Initial render – full build
+            parentElm = $('<thead class="gs-table-head"></thead>')
+            this.engine.render(newVNodes, parentElm)
+            this._lastHeaderVNodes = newVNodes
+            return parentElm
+        }
+
+        // Incremental update via diff + patch
+        const patches = this.engine.diff(this._lastHeaderVNodes || [], newVNodes)
+        this.engine.patch(parentElm, patches)
+        this._lastHeaderVNodes = newVNodes
+        return parentElm
+    }
+
+    /**
+     * _renderBody
+     * On first call (no parentElm) performs a full render into a new <tbody>.
+     * On subsequent calls uses diff + patch for incremental updates.
+     */
+    _renderBody(parentElm) {
+        const newVNodes = this._buildBodyVNodes()
+
+        if (!parentElm) {
+            // Initial render – full build
+            parentElm = $('<tbody class="gs-table-body"></tbody>')
+            this.engine.render(newVNodes, parentElm)
+            this._lastBodyVNodes = newVNodes
+            return parentElm
+        }
+
+        // Incremental update via diff + patch
+        const patches = this.engine.diff(this._lastBodyVNodes || [], newVNodes)
+        this.engine.patch(parentElm, patches)
+        this._lastBodyVNodes = newVNodes
+        return parentElm
     }
 
     /**
@@ -620,7 +675,7 @@ class TableSortable {
      * 2. When clicked on pagination
      * 3. When external data changed
      *
-     * Updation phase will not distroy table completely. It will re-render table cells and pagination.
+     * Uses diff + patch so only changed rows are mutated in the DOM.
      */
 
     _debounceUpdateTable() {
@@ -714,6 +769,9 @@ class TableSortable {
             if (columns) {
                 this.options.columns = columns
             }
+            // Reset vNode caches so next render does a clean diff from scratch
+            this._lastHeaderVNodes = null
+            this._lastBodyVNodes = null
             this.refresh()
         }
     }
@@ -791,6 +849,9 @@ class TableSortable {
             }
             this._cachedViewPort = -1
             this._cachedOption = null
+            // Reset vNode caches
+            this._lastHeaderVNodes = null
+            this._lastBodyVNodes = null
             this.emitLifeCycles('tableDidUnmount')
         }
     }
