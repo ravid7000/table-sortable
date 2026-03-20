@@ -94,16 +94,9 @@ class DataSet {
         return this.top(this._datasetLen)
     }
 
-    /**
-     * pushData – append new rows to the dataset.
-     * Updates _datasetLen so that slicing operations remain consistent.
-     *
-     * @param {Array} data – rows to append
-     */
     pushData(data) {
         if (Utils._isArray(data)) {
             Array.prototype.push.apply(this.dataset, data)
-            this._datasetLen = this.dataset.length
         }
     }
 

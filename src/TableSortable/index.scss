@@ -1,22 +1,3 @@
 .gs-button {
     cursor: pointer;
 }
-
-// ── Infinite-scroll / virtualization styles ───────────────────────────────────
-
-.gs-virtual-spacer {
-    // Spacer rows must not show any visual content
-    td {
-        padding: 0 !important;
-        border: 0 !important;
-        background: transparent !important;
-    }
-}
-
-// When the table container is used as a scroll host in infinite-scroll mode
-.gs-table-container {
-    &.gs-infinite-scroll {
-        overflow-y: auto;
-        position: relative;
-    }
-}
