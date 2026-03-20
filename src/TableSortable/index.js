@@ -7,6 +7,7 @@ import $ from 'jquery'
 import DataSet from '../DataSet'
 import Pret from './renderEngine'
 import * as Utils from '../utils'
+import VirtualizationEngine from './virtualization'
 import './index.scss'
 
 class TableSortable {
@@ -37,6 +38,12 @@ class TableSortable {
         tableWillUnmount: () => {},
         tableDidUnmount: () => {},
         onPaginationChange: null,
+        // ── Virtualization / infinite-scroll options ──────────────────────
+        paginationMode: 'paginated', // 'paginated' | 'infinite-scroll'
+        overscan: 5,
+        rowHeight: 40,
+        scrollThreshold: 200,
+        onLoadMore: null,
     }
     _styles = null
     _dataset = null
@@ -57,6 +64,7 @@ class TableSortable {
     }
     _cachedOption = null
     _cachedViewPort = -1
+    _virtualization = null   // VirtualizationEngine instance (infinite-scroll mode)
 
     constructor(options) {
         this.options = $.extend(this._defOptions, options)
@@ -292,8 +300,14 @@ class TableSortable {
      */
     getCurrentPageIndex() {
         const { _datasetLen } = this._dataset
-        const { pagination, rowsPerPage } = this.options
+        const { pagination, rowsPerPage, paginationMode } = this.options
         const { currentPage } = this._pagination // current page in pagination
+
+        // In infinite-scroll mode show all rows (no pagination slicing)
+        if (paginationMode === 'infinite-scroll') {
+            return { from: 0 }
+        }
+
         if (!pagination) {
             return {
                 from: 0,
@@ -369,7 +383,14 @@ class TableSortable {
             })
             rows.push(engine.createElement('tr', null, cols))
         })
-        return engine.render(rows, parentElm)
+        const result = engine.render(rows, parentElm)
+
+        // ── Infinite-scroll: hand off to VirtualizationEngine ────────────
+        if (this.options.paginationMode === 'infinite-scroll' && this._virtualization) {
+            this._virtualization.update(this._dataset._datasetLen)
+        }
+
+        return result
     }
 
     /**
@@ -520,7 +541,16 @@ class TableSortable {
     }
 
     createPagination() {
-        const { rowsPerPage, pagination, totalPages } = this.options
+        const { rowsPerPage, pagination, totalPages, paginationMode } = this.options
+
+        // In infinite-scroll mode pagination buttons are hidden
+        if (paginationMode === 'infinite-scroll') {
+            if (this._pagination.elm) {
+                this._pagination.elm.hide()
+            }
+            return false
+        }
+
         if (!pagination) {
             return false
         }
@@ -592,6 +622,55 @@ class TableSortable {
     }
 
     /**
+     * _initVirtualization
+     * Set up the VirtualizationEngine when paginationMode === 'infinite-scroll'.
+     */
+    _initVirtualization() {
+        const { paginationMode, rowHeight, overscan, scrollThreshold, onLoadMore } = this.options
+
+        if (paginationMode !== 'infinite-scroll') {
+            return
+        }
+
+        // Tear down any existing engine first
+        if (this._virtualization) {
+            this._virtualization.detach()
+        }
+
+        this._virtualization = new VirtualizationEngine({
+            rowHeight,
+            overscan,
+            scrollThreshold,
+            onLoadMore: Utils._isFunction(onLoadMore)
+                ? (page, rowsLoaded) => {
+                      const result = onLoadMore(page, rowsLoaded)
+                      if (result && Utils._isFunction(result.then)) {
+                          return result.then(newRows => {
+                              if (Array.isArray(newRows) && newRows.length) {
+                                  this._dataset.pushData(newRows)
+                                  this.updateTable()
+                              }
+                          })
+                      }
+                  }
+                : null,
+        })
+
+        // The scroll container is the gs-table-container div (or the root element)
+        const scrollContainer = this._rootElement.find('.gs-table-container')
+        const container = scrollContainer.length ? scrollContainer : this._rootElement
+
+        // Make the container scrollable if not already
+        if (container.css('overflow-y') === 'visible' || !container.css('overflow-y')) {
+            container.css({ 'overflow-y': 'auto', position: 'relative' })
+        }
+
+        this._virtualization.attach(container, this._tbody)
+        // Perform the initial window calculation now that the tbody is populated
+        this._virtualization.update(this._dataset._datasetLen)
+    }
+
+    /**
      * init
      * @description Initial rendering
      */
@@ -607,6 +686,7 @@ class TableSortable {
         this.createPagination()
         this._bindSearchField()
         this._initStyles()
+        this._initVirtualization()
         this._isMounted = true
         this.emitLifeCycles('tableDidMount')
         if (this._cachedViewPort === -1) {
@@ -765,6 +845,13 @@ class TableSortable {
     distroy = () => {
         if (this._isMounted) {
             this.emitLifeCycles('tableWillUnmount')
+
+            // Detach virtualization engine if active
+            if (this._virtualization) {
+                this._virtualization.detach()
+                this._virtualization = null
+            }
+
             this._table.remove()
             if (this._styles && this._styles.length) {
                 this._styles.remove()
