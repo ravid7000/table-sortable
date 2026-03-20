@@ -32,6 +32,10 @@ class TableSortable {
     _cachedOption = null
     _cachedViewPort = -1
 
+    // vNode caches – used by the diff/patch system to avoid full re-renders
+    _lastHeaderVNodes = null
+    _lastBodyVNodes = null
+
     constructor(options) {
         this.options = normalizeOptions(options || {})
         this._rootElement = $(this.options.element)
@@ -301,24 +305,21 @@ class TableSortable {
         return `<tr><td colspan="${colSpan}" class="gs-no-data">${content}</td></tr>`
     }
 
-    _renderHeader(parentElm) {
-        if (!parentElm) {
-            parentElm = $('<thead class="gs-table-head"></thead>')
-        }
+    // -----------------------------------------------------------------------
+    // vNode builders – produce the virtual representation that will be
+    // compared against the previous render to compute the minimal diff.
+    // -----------------------------------------------------------------------
 
-        // Apply sticky header if requested
-        const { stickyHeader } = this.options
-        if (stickyHeader) {
-            parentElm.addClass('gs-sticky-header')
-        } else {
-            parentElm.removeClass('gs-sticky-header')
-        }
-
+    /**
+     * _buildHeaderVNodes
+     * Builds the list of vNodes representing the single header <tr>.
+     * Returns an array with one element (the <tr> vNode).
+     */
+    _buildHeaderVNodes() {
         const { columns, formatHeader, headerRenderers } = this.options
+        const colKeys = Utils._keys(columns)
         const cols = []
-        const colKeys = Utils._keys(columns) // TODO: add legacy support
 
-        // create header
         Utils._forEach(colKeys, (part, i) => {
             let c = columns[part]
 
@@ -330,41 +331,37 @@ class TableSortable {
             }
 
             c = this._addColSorting($('<span></span>').html(c), part)
-            const tbd = this.engine.createElement('th', {
-                html: c,
-            })
-            cols.push(tbd)
+            cols.push(this.engine.createVNode('th', { html: c }))
         })
 
-        const thr = this.engine.createElement('tr', null, cols)
-        return this.engine.render(thr, parentElm)
+        return [this.engine.createVNode('tr', null, cols)]
     }
 
-    _renderBody(parentElm) {
-        if (!parentElm) {
-            parentElm = $('<tbody class="gs-table-body"></tbody>')
-        }
+    /**
+     * _buildBodyVNodes
+     * Builds the list of vNodes representing each data <tr> row.
+     * Returns null when there is no data (signals empty-state to _renderBody).
+     */
+    _buildBodyVNodes() {
         const engine = this.engine
-        const { columns, formatCell, cellRenderers, rowClassFn, onRowClick } = this.options
+        const { columns, formatCell, cellRenderers, rowClassFn } = this.options
         const { from, to } = this.getCurrentPageIndex()
+
         let currentPageData = []
         if (to === undefined) {
             currentPageData = this._dataset.top()
         } else {
             currentPageData = this._dataset.get(from, to)
         }
-        const rows = [] // list of rows in body
-        const colKeys = Utils._keys(columns) // TODO: add legacy support
 
-        // Render empty-state when there is no data
+        // Signal empty-state to _renderBody
         if (!currentPageData || currentPageData.length === 0) {
-            const noDataHtml = this._resolveNoDataTemplate()
-            parentElm.empty().html(noDataHtml)
-            return parentElm
+            return null
         }
 
-        // create body
-        const self = this
+        const colKeys = Utils._keys(columns)
+        const rows = []
+
         Utils._forEach(currentPageData, function(part, i) {
             const cols = []
             Utils._forEach(colKeys, key => {
@@ -372,17 +369,11 @@ class TableSortable {
                     let tbd
                     // cellRenderers take priority per-column
                     if (cellRenderers && Utils._isFunction(cellRenderers[key])) {
-                        tbd = engine.createElement('td', {
-                            html: cellRenderers[key](part[key], part),
-                        })
+                        tbd = engine.createVNode('td', { html: cellRenderers[key](part[key], part) })
                     } else if (Utils._isFunction(formatCell)) {
-                        tbd = engine.createElement('td', {
-                            html: formatCell(part, key),
-                        })
+                        tbd = engine.createVNode('td', { html: formatCell(part, key) })
                     } else {
-                        tbd = engine.createElement('td', {
-                            html: part[key],
-                        })
+                        tbd = engine.createVNode('td', { html: part[key] })
                     }
                     cols.push(tbd)
                 }
@@ -395,24 +386,42 @@ class TableSortable {
             }
 
             const rowAttrs = rowClass ? { className: rowClass } : null
-            const row = engine.createElement('tr', rowAttrs, cols)
-
-            // Attach onRowClick after row is rendered into the DOM
-            rows.push({ vnode: row, rowData: part, rowIndex: i })
+            rows.push(engine.createVNode('tr', rowAttrs, cols))
         })
 
-        // Render rows into parentElm
-        const vnodes = rows.map(r => r.vnode)
-        engine.render(vnodes, parentElm)
+        return rows
+    }
 
-        // Bind onRowClick handlers
-        if (Utils._isFunction(onRowClick)) {
-            const trElements = parentElm.find('tr')
-            rows.forEach(function(r, idx) {
-                $(trElements[idx]).on('click', function(e) {
-                    onRowClick(r.rowData, r.rowIndex, e)
-                })
-            })
+    // -----------------------------------------------------------------------
+    // Rendering helpers
+    // -----------------------------------------------------------------------
+
+    /**
+     * _renderHeader
+     * On first call (no parentElm) performs a full render into a new <thead>.
+     * On subsequent calls uses diff + patch for incremental updates.
+     */
+    _renderHeader(parentElm) {
+        const newVNodes = this._buildHeaderVNodes()
+
+        if (!parentElm) {
+            // Initial render – full build
+            parentElm = $('<thead class="gs-table-head"></thead>')
+            this.engine.render(newVNodes, parentElm)
+            this._lastHeaderVNodes = newVNodes
+        } else {
+            // Incremental update via diff + patch
+            const patches = this.engine.diff(this._lastHeaderVNodes || [], newVNodes)
+            this.engine.patch(parentElm, patches)
+            this._lastHeaderVNodes = newVNodes
+        }
+
+        // Apply sticky header if requested
+        const { stickyHeader } = this.options
+        if (stickyHeader) {
+            parentElm.addClass('gs-sticky-header')
+        } else {
+            parentElm.removeClass('gs-sticky-header')
         }
 
         return parentElm
@@ -434,6 +443,53 @@ class TableSortable {
             this._table.find('colgroup').remove()
             this._table.prepend(colgroup)
         }
+    }
+
+    /**
+     * _renderBody
+     * On first call (no parentElm) performs a full render into a new <tbody>.
+     * On subsequent calls uses diff + patch for incremental updates.
+     */
+    _renderBody(parentElm) {
+        const { onRowClick } = this.options
+        const newVNodes = this._buildBodyVNodes()
+
+        if (!parentElm) {
+            // Initial render – full build
+            parentElm = $('<tbody class="gs-table-body"></tbody>')
+        }
+
+        // Handle empty-state
+        if (!newVNodes) {
+            parentElm.empty().html(this._resolveNoDataTemplate())
+            this._lastBodyVNodes = []
+            return parentElm
+        }
+
+        if (!this._lastBodyVNodes) {
+            this.engine.render(newVNodes, parentElm)
+        } else {
+            // Incremental update via diff + patch
+            const patches = this.engine.diff(this._lastBodyVNodes, newVNodes)
+            this.engine.patch(parentElm, patches)
+        }
+        this._lastBodyVNodes = newVNodes
+
+        // Bind onRowClick handlers
+        if (Utils._isFunction(onRowClick)) {
+            const { from, to } = this.getCurrentPageIndex()
+            const currentPageData = to === undefined
+                ? this._dataset.top()
+                : this._dataset.get(from, to)
+            const trElements = parentElm.find('tr')
+            currentPageData.forEach(function(rowData, idx) {
+                $(trElements[idx]).off('click').on('click', function(e) {
+                    onRowClick(rowData, idx, e)
+                })
+            })
+        }
+
+        return parentElm
     }
 
     /**
@@ -685,7 +741,7 @@ class TableSortable {
      * 2. When clicked on pagination
      * 3. When external data changed
      *
-     * Updation phase will not distroy table completely. It will re-render table cells and pagination.
+     * Uses diff + patch so only changed rows are mutated in the DOM.
      */
 
     _debounceUpdateTable() {
@@ -781,6 +837,9 @@ class TableSortable {
             if (columns) {
                 this.options.columns = columns
             }
+            // Reset vNode caches so next render does a clean diff from scratch
+            this._lastHeaderVNodes = null
+            this._lastBodyVNodes = null
             this.refresh()
         }
     }
@@ -858,6 +917,9 @@ class TableSortable {
             }
             this._cachedViewPort = -1
             this._cachedOption = null
+            // Reset vNode caches
+            this._lastHeaderVNodes = null
+            this._lastBodyVNodes = null
             this.emitLifeCycles('tableDidUnmount')
         }
     }
