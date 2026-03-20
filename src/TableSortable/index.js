@@ -7,37 +7,11 @@ import $ from 'jquery'
 import DataSet from '../DataSet'
 import Pret from './renderEngine'
 import * as Utils from '../utils'
+import { normalizeOptions } from './options'
 import './index.scss'
 
 class TableSortable {
     _name = 'tableSortable'
-    _defOptions = {
-        element: '',
-        data: [],
-        columns: {},
-        sorting: true,
-        pagination: true,
-        paginationContainer: null,
-        rowsPerPage: 10,
-        formatCell: null,
-        formatHeader: null,
-        searchField: null,
-        responsive: {},
-        totalPages: 0,
-        sortingIcons: {
-            asc: '<span>▼</span>',
-            desc: '<span>▲</span>',
-        },
-        nextText: '<span>Next</span>',
-        prevText: '<span>Prev</span>',
-        tableWillMount: () => {},
-        tableDidMount: () => {},
-        tableWillUpdate: () => {},
-        tableDidUpdate: () => {},
-        tableWillUnmount: () => {},
-        tableDidUnmount: () => {},
-        onPaginationChange: null,
-    }
     _styles = null
     _dataset = null
     _table = null
@@ -63,8 +37,7 @@ class TableSortable {
     _lastBodyVNodes = null
 
     constructor(options) {
-        this.options = $.extend(this._defOptions, options)
-        delete this._defOptions
+        this.options = normalizeOptions(options || {})
         this._rootElement = $(this.options.element)
         this.engine = Pret()
         this.optionDepreciation()
@@ -201,7 +174,11 @@ class TableSortable {
      * _createTable
      */
     _createTable() {
+        const { tableClassName } = this.options
         this._table = $('<table></table>').addClass('table gs-table')
+        if (tableClassName) {
+            this._table.addClass(tableClassName)
+        }
     }
 
     /**
@@ -312,6 +289,22 @@ class TableSortable {
         }
     }
 
+    /**
+     * _resolveNoDataTemplate
+     * @returns {string} HTML string for the empty-state row.
+     */
+    _resolveNoDataTemplate() {
+        const { noDataTemplate, columns } = this.options
+        const colSpan = Utils._keys(columns).length || 1
+        let content = '<em>No data available</em>'
+        if (Utils._isFunction(noDataTemplate)) {
+            content = noDataTemplate()
+        } else if (Utils._isString(noDataTemplate) && noDataTemplate) {
+            content = noDataTemplate
+        }
+        return `<tr><td colspan="${colSpan}" class="gs-no-data">${content}</td></tr>`
+    }
+
     // -----------------------------------------------------------------------
     // vNode builders – produce the virtual representation that will be
     // compared against the previous render to compute the minimal diff.
@@ -323,15 +316,20 @@ class TableSortable {
      * Returns an array with one element (the <tr> vNode).
      */
     _buildHeaderVNodes() {
-        const { columns, formatHeader } = this.options
+        const { columns, formatHeader, headerRenderers } = this.options
         const colKeys = Utils._keys(columns)
         const cols = []
 
         Utils._forEach(colKeys, (part, i) => {
             let c = columns[part]
-            if (Utils._isFunction(formatHeader)) {
+
+            // headerRenderers take priority per-column
+            if (headerRenderers && Utils._isFunction(headerRenderers[part])) {
+                c = headerRenderers[part](columns[part])
+            } else if (Utils._isFunction(formatHeader)) {
                 c = formatHeader(columns[part], part, i)
             }
+
             c = this._addColSorting($('<span></span>').html(c), part)
             cols.push(this.engine.createVNode('th', { html: c }))
         })
@@ -342,10 +340,11 @@ class TableSortable {
     /**
      * _buildBodyVNodes
      * Builds the list of vNodes representing each data <tr> row.
+     * Returns null when there is no data (signals empty-state to _renderBody).
      */
     _buildBodyVNodes() {
         const engine = this.engine
-        const { columns, formatCell } = this.options
+        const { columns, formatCell, cellRenderers, rowClassFn } = this.options
         const { from, to } = this.getCurrentPageIndex()
 
         let currentPageData = []
@@ -355,15 +354,23 @@ class TableSortable {
             currentPageData = this._dataset.get(from, to)
         }
 
+        // Signal empty-state to _renderBody
+        if (!currentPageData || currentPageData.length === 0) {
+            return null
+        }
+
         const colKeys = Utils._keys(columns)
         const rows = []
 
-        Utils._forEach(currentPageData, function(part) {
+        Utils._forEach(currentPageData, function(part, i) {
             const cols = []
             Utils._forEach(colKeys, key => {
                 if (part[key] !== undefined) {
                     let tbd
-                    if (Utils._isFunction(formatCell)) {
+                    // cellRenderers take priority per-column
+                    if (cellRenderers && Utils._isFunction(cellRenderers[key])) {
+                        tbd = engine.createVNode('td', { html: cellRenderers[key](part[key], part) })
+                    } else if (Utils._isFunction(formatCell)) {
                         tbd = engine.createVNode('td', { html: formatCell(part, key) })
                     } else {
                         tbd = engine.createVNode('td', { html: part[key] })
@@ -371,7 +378,15 @@ class TableSortable {
                     cols.push(tbd)
                 }
             })
-            rows.push(engine.createVNode('tr', null, cols))
+
+            // Compute row class
+            let rowClass = null
+            if (Utils._isFunction(rowClassFn)) {
+                rowClass = rowClassFn(part, i)
+            }
+
+            const rowAttrs = rowClass ? { className: rowClass } : null
+            rows.push(engine.createVNode('tr', rowAttrs, cols))
         })
 
         return rows
@@ -394,14 +409,40 @@ class TableSortable {
             parentElm = $('<thead class="gs-table-head"></thead>')
             this.engine.render(newVNodes, parentElm)
             this._lastHeaderVNodes = newVNodes
-            return parentElm
+        } else {
+            // Incremental update via diff + patch
+            const patches = this.engine.diff(this._lastHeaderVNodes || [], newVNodes)
+            this.engine.patch(parentElm, patches)
+            this._lastHeaderVNodes = newVNodes
         }
 
-        // Incremental update via diff + patch
-        const patches = this.engine.diff(this._lastHeaderVNodes || [], newVNodes)
-        this.engine.patch(parentElm, patches)
-        this._lastHeaderVNodes = newVNodes
+        // Apply sticky header if requested
+        const { stickyHeader } = this.options
+        if (stickyHeader) {
+            parentElm.addClass('gs-sticky-header')
+        } else {
+            parentElm.removeClass('gs-sticky-header')
+        }
+
         return parentElm
+    }
+
+    /**
+     * _renderColGroup
+     * Builds and inserts a <colgroup> into the table when columnWidths are set.
+     */
+    _renderColGroup() {
+        const { columns, columnWidths } = this.options
+        if (!columnWidths || Utils._keys(columnWidths).length === 0) {
+            return
+        }
+        const colKeys = Utils._keys(columns)
+        const colgroup = this.engine.renderColGroup(colKeys, columnWidths)
+        if (colgroup) {
+            // Remove any existing colgroup first
+            this._table.find('colgroup').remove()
+            this._table.prepend(colgroup)
+        }
     }
 
     /**
@@ -410,20 +451,44 @@ class TableSortable {
      * On subsequent calls uses diff + patch for incremental updates.
      */
     _renderBody(parentElm) {
+        const { onRowClick } = this.options
         const newVNodes = this._buildBodyVNodes()
 
         if (!parentElm) {
             // Initial render – full build
             parentElm = $('<tbody class="gs-table-body"></tbody>')
-            this.engine.render(newVNodes, parentElm)
-            this._lastBodyVNodes = newVNodes
+        }
+
+        // Handle empty-state
+        if (!newVNodes) {
+            parentElm.empty().html(this._resolveNoDataTemplate())
+            this._lastBodyVNodes = []
             return parentElm
         }
 
-        // Incremental update via diff + patch
-        const patches = this.engine.diff(this._lastBodyVNodes || [], newVNodes)
-        this.engine.patch(parentElm, patches)
+        if (!this._lastBodyVNodes) {
+            this.engine.render(newVNodes, parentElm)
+        } else {
+            // Incremental update via diff + patch
+            const patches = this.engine.diff(this._lastBodyVNodes, newVNodes)
+            this.engine.patch(parentElm, patches)
+        }
         this._lastBodyVNodes = newVNodes
+
+        // Bind onRowClick handlers
+        if (Utils._isFunction(onRowClick)) {
+            const { from, to } = this.getCurrentPageIndex()
+            const currentPageData = to === undefined
+                ? this._dataset.top()
+                : this._dataset.get(from, to)
+            const trElements = parentElm.find('tr')
+            currentPageData.forEach(function(rowData, idx) {
+                $(trElements[idx]).off('click').on('click', function(e) {
+                    onRowClick(rowData, idx, e)
+                })
+            })
+        }
+
         return parentElm
     }
 
@@ -658,6 +723,7 @@ class TableSortable {
         this._validateColumns()
         const { thead, tbody } = this._createCells()
         this._generateTable(thead, tbody)
+        this._renderColGroup()
         this._renderTable()
         this.createPagination()
         this._bindSearchField()
@@ -691,6 +757,7 @@ class TableSortable {
         this._isUpdating = true
         this._renderHeader(this._thead)
         this._renderBody(this._tbody)
+        this._renderColGroup()
         this.createPagination()
         this._isUpdating = false
         this.emitLifeCycles('tableDidUpdate')
@@ -705,6 +772,7 @@ class TableSortable {
         this.emitLifeCycles('tableWillUpdate')
         this._renderHeader(this._thead)
         this._renderBody(this._tbody)
+        this._renderColGroup()
         this._isUpdating = false
         this.emitLifeCycles('tableDidUpdate')
     }

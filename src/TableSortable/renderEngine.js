@@ -252,6 +252,31 @@ const renderElement = (pretObj, rootNode, isChild) => {
     return rootNode
 }
 
+/**
+ * renderColGroup
+ *
+ * Builds a `<colgroup>` element containing one `<col>` per column,
+ * applying per-column CSS widths from `columnWidths` where provided.
+ *
+ * @param {string[]}             colKeys      - Ordered array of column keys.
+ * @param {Object<string,string>} columnWidths - Map of columnKey → CSS width string.
+ * @returns {jQuery} The constructed `<colgroup>` jQuery element.
+ */
+const renderColGroup = (colKeys, columnWidths) => {
+    if (!columnWidths || Object.keys(columnWidths).length === 0) {
+        return null
+    }
+    const colgroup = $('<colgroup></colgroup>')
+    colKeys.forEach(key => {
+        const col = $('<col />')
+        if (columnWidths[key]) {
+            col.css('width', columnWidths[key])
+        }
+        colgroup.append(col)
+    })
+    return colgroup
+}
+
 // ---------------------------------------------------------------------------
 // Pret factory (public API)
 // ---------------------------------------------------------------------------
@@ -270,6 +295,7 @@ const Pret = () => {
         // legacy API (kept for backward compatibility)
         createElement: createVNode,
         render: renderElement,
+        renderColGroup,
 
         // new diffing API
         createVNode,
