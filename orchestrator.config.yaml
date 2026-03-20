@@ -1,0 +1,14 @@
+# Claude Agent Orchestrator Configuration
+# apiKey: "sk-ant-..."   # optional — falls back to ANTHROPIC_API_KEY env var
+model: claude-opus-4-6
+maxAgents: 5
+# maxBudgetPerAgentUsd: 2.0   # optional budget cap per sub-agent
+
+workspace:
+  type: worktree     # "worktree" (default) or "clone"
+  # repoUrl: "https://github.com/user/repo"   # required for "clone" mode
+
+# github:
+#   token: "ghp_..."   # optional — gh CLI uses its own auth by default
+
+tmux: true   # set to false to disable tmux display

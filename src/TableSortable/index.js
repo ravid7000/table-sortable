@@ -8,6 +8,7 @@ import DataSet from '../DataSet'
 import Pret from './renderEngine'
 import * as Utils from '../utils'
 import VirtualizationEngine from './virtualization'
+import { normalizeOptions } from './options'
 import './index.scss'
 
 class TableSortable {
@@ -66,9 +67,12 @@ class TableSortable {
     _cachedViewPort = -1
     _virtualization = null   // VirtualizationEngine instance (infinite-scroll mode)
 
+    // vNode caches – used by the diff/patch system to avoid full re-renders
+    _lastHeaderVNodes = null
+    _lastBodyVNodes = null
+
     constructor(options) {
-        this.options = $.extend(this._defOptions, options)
-        delete this._defOptions
+        this.options = normalizeOptions(options || {})
         this._rootElement = $(this.options.element)
         this.engine = Pret()
         this.optionDepreciation()
@@ -205,7 +209,11 @@ class TableSortable {
      * _createTable
      */
     _createTable() {
+        const { tableClassName } = this.options
         this._table = $('<table></table>').addClass('table gs-table')
+        if (tableClassName) {
+            this._table.addClass(tableClassName)
+        }
     }
 
     /**
@@ -322,66 +330,104 @@ class TableSortable {
         }
     }
 
-    _renderHeader(parentElm) {
-        if (!parentElm) {
-            parentElm = $('<thead class="gs-table-head"></thead>')
+    /**
+     * _resolveNoDataTemplate
+     * @returns {string} HTML string for the empty-state row.
+     */
+    _resolveNoDataTemplate() {
+        const { noDataTemplate, columns } = this.options
+        const colSpan = Utils._keys(columns).length || 1
+        let content = '<em>No data available</em>'
+        if (Utils._isFunction(noDataTemplate)) {
+            content = noDataTemplate()
+        } else if (Utils._isString(noDataTemplate) && noDataTemplate) {
+            content = noDataTemplate
         }
-        const { columns, formatHeader } = this.options
-        const cols = []
-        const colKeys = Utils._keys(columns) // TODO: add legacy support
-
-        // create header
-        Utils._forEach(colKeys, (part, i) => {
-            let c = columns[part]
-            if (Utils._isFunction(formatHeader)) {
-                c = formatHeader(columns[part], part, i)
-            }
-            c = this._addColSorting($('<span></span>').html(c), part)
-            const tbd = this.engine.createElement('th', {
-                html: c,
-            })
-            cols.push(tbd)
-        })
-
-        const thr = this.engine.createElement('tr', null, cols)
-        return this.engine.render(thr, parentElm)
+        return `<tr><td colspan="${colSpan}" class="gs-no-data">${content}</td></tr>`
     }
 
-    _renderBody(parentElm) {
-        if (!parentElm) {
-            parentElm = $('<tbody class="gs-table-body"></tbody>')
-        }
+    // -----------------------------------------------------------------------
+    // vNode builders – produce the virtual representation that will be
+    // compared against the previous render to compute the minimal diff.
+    // -----------------------------------------------------------------------
+
+    /**
+     * _buildHeaderVNodes
+     * Builds the list of vNodes representing the single header <tr>.
+     * Returns an array with one element (the <tr> vNode).
+     */
+    _buildHeaderVNodes() {
+        const { columns, formatHeader, headerRenderers } = this.options
+        const colKeys = Utils._keys(columns)
+        const cols = []
+
+        Utils._forEach(colKeys, (part, i) => {
+            let c = columns[part]
+
+            // headerRenderers take priority per-column
+            if (headerRenderers && Utils._isFunction(headerRenderers[part])) {
+                c = headerRenderers[part](columns[part])
+            } else if (Utils._isFunction(formatHeader)) {
+                c = formatHeader(columns[part], part, i)
+            }
+
+            c = this._addColSorting($('<span></span>').html(c), part)
+            cols.push(this.engine.createVNode('th', { html: c }))
+        })
+
+        return [this.engine.createVNode('tr', null, cols)]
+    }
+
+    /**
+     * _buildBodyVNodes
+     * Builds the list of vNodes representing each data <tr> row.
+     * Returns null when there is no data (signals empty-state to _renderBody).
+     */
+    _buildBodyVNodes() {
         const engine = this.engine
-        const { columns, formatCell } = this.options
+        const { columns, formatCell, cellRenderers, rowClassFn } = this.options
         const { from, to } = this.getCurrentPageIndex()
+
         let currentPageData = []
         if (to === undefined) {
             currentPageData = this._dataset.top()
         } else {
             currentPageData = this._dataset.get(from, to)
         }
-        const rows = [] // list of rows in body
-        const colKeys = Utils._keys(columns) // TODO: add legacy support
 
-        // create body
+        // Signal empty-state to _renderBody
+        if (!currentPageData || currentPageData.length === 0) {
+            return null
+        }
+
+        const colKeys = Utils._keys(columns)
+        const rows = []
+
         Utils._forEach(currentPageData, function(part, i) {
             const cols = []
             Utils._forEach(colKeys, key => {
                 if (part[key] !== undefined) {
                     let tbd
-                    if (Utils._isFunction(formatCell)) {
-                        tbd = engine.createElement('td', {
-                            html: formatCell(part, key),
-                        })
+                    // cellRenderers take priority per-column
+                    if (cellRenderers && Utils._isFunction(cellRenderers[key])) {
+                        tbd = engine.createVNode('td', { html: cellRenderers[key](part[key], part) })
+                    } else if (Utils._isFunction(formatCell)) {
+                        tbd = engine.createVNode('td', { html: formatCell(part, key) })
                     } else {
-                        tbd = engine.createElement('td', {
-                            html: part[key],
-                        })
+                        tbd = engine.createVNode('td', { html: part[key] })
                     }
                     cols.push(tbd)
                 }
             })
-            rows.push(engine.createElement('tr', null, cols))
+
+            // Compute row class
+            let rowClass = null
+            if (Utils._isFunction(rowClassFn)) {
+                rowClass = rowClassFn(part, i)
+            }
+
+            const rowAttrs = rowClass ? { className: rowClass } : null
+            rows.push(engine.createVNode('tr', rowAttrs, cols))
         })
         const result = engine.render(rows, parentElm)
 
@@ -391,6 +437,106 @@ class TableSortable {
         }
 
         return result
+    }
+
+    // -----------------------------------------------------------------------
+    // Rendering helpers
+    // -----------------------------------------------------------------------
+
+    /**
+     * _renderHeader
+     * On first call (no parentElm) performs a full render into a new <thead>.
+     * On subsequent calls uses diff + patch for incremental updates.
+     */
+    _renderHeader(parentElm) {
+        const newVNodes = this._buildHeaderVNodes()
+
+        if (!parentElm) {
+            // Initial render – full build
+            parentElm = $('<thead class="gs-table-head"></thead>')
+            this.engine.render(newVNodes, parentElm)
+            this._lastHeaderVNodes = newVNodes
+        } else {
+            // Incremental update via diff + patch
+            const patches = this.engine.diff(this._lastHeaderVNodes || [], newVNodes)
+            this.engine.patch(parentElm, patches)
+            this._lastHeaderVNodes = newVNodes
+        }
+
+        // Apply sticky header if requested
+        const { stickyHeader } = this.options
+        if (stickyHeader) {
+            parentElm.addClass('gs-sticky-header')
+        } else {
+            parentElm.removeClass('gs-sticky-header')
+        }
+
+        return parentElm
+    }
+
+    /**
+     * _renderColGroup
+     * Builds and inserts a <colgroup> into the table when columnWidths are set.
+     */
+    _renderColGroup() {
+        const { columns, columnWidths } = this.options
+        if (!columnWidths || Utils._keys(columnWidths).length === 0) {
+            return
+        }
+        const colKeys = Utils._keys(columns)
+        const colgroup = this.engine.renderColGroup(colKeys, columnWidths)
+        if (colgroup) {
+            // Remove any existing colgroup first
+            this._table.find('colgroup').remove()
+            this._table.prepend(colgroup)
+        }
+    }
+
+    /**
+     * _renderBody
+     * On first call (no parentElm) performs a full render into a new <tbody>.
+     * On subsequent calls uses diff + patch for incremental updates.
+     */
+    _renderBody(parentElm) {
+        const { onRowClick } = this.options
+        const newVNodes = this._buildBodyVNodes()
+
+        if (!parentElm) {
+            // Initial render – full build
+            parentElm = $('<tbody class="gs-table-body"></tbody>')
+        }
+
+        // Handle empty-state
+        if (!newVNodes) {
+            parentElm.empty().html(this._resolveNoDataTemplate())
+            this._lastBodyVNodes = []
+            return parentElm
+        }
+
+        if (!this._lastBodyVNodes) {
+            this.engine.render(newVNodes, parentElm)
+        } else {
+            // Incremental update via diff + patch
+            const patches = this.engine.diff(this._lastBodyVNodes, newVNodes)
+            this.engine.patch(parentElm, patches)
+        }
+        this._lastBodyVNodes = newVNodes
+
+        // Bind onRowClick handlers
+        if (Utils._isFunction(onRowClick)) {
+            const { from, to } = this.getCurrentPageIndex()
+            const currentPageData = to === undefined
+                ? this._dataset.top()
+                : this._dataset.get(from, to)
+            const trElements = parentElm.find('tr')
+            currentPageData.forEach(function(rowData, idx) {
+                $(trElements[idx]).off('click').on('click', function(e) {
+                    onRowClick(rowData, idx, e)
+                })
+            })
+        }
+
+        return parentElm
     }
 
     /**
@@ -682,6 +828,7 @@ class TableSortable {
         this._validateColumns()
         const { thead, tbody } = this._createCells()
         this._generateTable(thead, tbody)
+        this._renderColGroup()
         this._renderTable()
         this.createPagination()
         this._bindSearchField()
@@ -700,7 +847,7 @@ class TableSortable {
      * 2. When clicked on pagination
      * 3. When external data changed
      *
-     * Updation phase will not distroy table completely. It will re-render table cells and pagination.
+     * Uses diff + patch so only changed rows are mutated in the DOM.
      */
 
     _debounceUpdateTable() {
@@ -716,6 +863,7 @@ class TableSortable {
         this._isUpdating = true
         this._renderHeader(this._thead)
         this._renderBody(this._tbody)
+        this._renderColGroup()
         this.createPagination()
         this._isUpdating = false
         this.emitLifeCycles('tableDidUpdate')
@@ -730,6 +878,7 @@ class TableSortable {
         this.emitLifeCycles('tableWillUpdate')
         this._renderHeader(this._thead)
         this._renderBody(this._tbody)
+        this._renderColGroup()
         this._isUpdating = false
         this.emitLifeCycles('tableDidUpdate')
     }
@@ -794,6 +943,9 @@ class TableSortable {
             if (columns) {
                 this.options.columns = columns
             }
+            // Reset vNode caches so next render does a clean diff from scratch
+            this._lastHeaderVNodes = null
+            this._lastBodyVNodes = null
             this.refresh()
         }
     }
@@ -878,6 +1030,9 @@ class TableSortable {
             }
             this._cachedViewPort = -1
             this._cachedOption = null
+            // Reset vNode caches
+            this._lastHeaderVNodes = null
+            this._lastBodyVNodes = null
             this.emitLifeCycles('tableDidUnmount')
         }
     }
