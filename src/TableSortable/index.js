@@ -154,10 +154,10 @@ class TableSortable {
             'second argument must be array of keys'
         )
         if (!cols.length) {
-            cols = columns
+            cols = Utils._keys(cols)
         }
         this._pagination.currentPage = 0
-        this._dataset.lookUp(val, Utils._keys(cols))
+        this._dataset.lookUp(val, cols)
         this.debounceUpdateTable()
     }
 
